@@ -133,8 +133,8 @@ distributed under the directory `examples/`.
 In its simplest form, `zipdog` is invoked specifyiing a zip file:
 
 ```bash
-$ ./zipdog.py --files file-1.zip
- Processing 'file-1.zip' ...
+$ ./zipdog.py --files examples/file-1.zip
+ Processing examples/'file-1.zip' ...
 ---------------------------------------------------------------
  Warning: the folder with the third part 'parte-3/' has not been found
           this does not invalidate your .zip file but be warned that you will not be awarded with
@@ -146,6 +146,26 @@ seen, `zipdog.py` automatically determines that this specific script
 is correct, even if there are some files missing ---expected under a
 directory named `parte-3`.
 
+In case a zip file is found to be invalid (because it does not match
+the rules given in the *specification schema* of the *configuration
+file*), execution immediately halts with a message warning the user:
+
+```bash
+$ ./zipdog.py --files examples/file-0.zip 
+ Processing 'examples/file-0.zip' ...
+---------------------------------------------------------------
+ Fatal error: either you did not provide the report in pdf format or you put it in a different
+              location. Make sure to locate the pdf report in the root directory. The name should
+              adhere to the regular expression given below
+
+ Regular expression: p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/(?P<nia3>\d{6})-(?P<nia4>\d{6})\.pdf$
+ Example           : p1-346089-330696/346089-330696.pdf
+
+ INVALID ZIP FILE!
+```
+
+But this is true only when using the default configuration file,
+`conf.py`. 
 
 Finally, `zipwatch` is distributed with the following directives:
 
