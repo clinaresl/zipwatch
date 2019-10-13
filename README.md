@@ -8,32 +8,33 @@ because some or found, or because they are not found.
 # Dependencies #
 
 `zipwatch` requires Python 3.6 or greater. Other than this, it does
-not have any other external dependencies
+not have any other external dependencies but those explicitly required
+by *configuration files* ---see more below.
 
 
 # Install #
 
 To install the latest version of “zipwatch”:
 
-```python
+```bash
 pip install "zipwatch"
 ```
 
 To install a specific version:
 
-```python
+```bash
 pip install "zipwatch==1.4"
 ```
 
 To install greater than or equal to one version and less than another:
 
-```python
+```bash
 pip install "zipwatch>=1,<2"
 ```
 
 To install a version that’s "compatible" with a certain version: 4
 
-```python
+```bash
 pip install "zipwatch~=1.4.2"
 ```
 
@@ -41,7 +42,7 @@ In this case, this means to install any version "==1.4.*" version that’s also 
 
 Upgrade an already installed "SomeProject" to the latest from PyPI:
 
-```python
+```bash
 pip install --upgrade SomeProject
 ```
 
@@ -117,7 +118,7 @@ which is implemented just invoking the function `showSummary ()` that
 has to be be provided by the configuration file.
 
 By default, `zipwatch.py` expects a configuration file `conf.py` to be
-readily available. However, it is possible to provide any
+readily available. However, it is possible to provide any arbitrary
 configuration file with the directive `--configuration`. A few
 examples are shown below.
 

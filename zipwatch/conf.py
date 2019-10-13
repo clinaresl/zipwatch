@@ -165,35 +165,35 @@ schemaSpec = [
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-1/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/$", 1,
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-1/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/.+$", -1,
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-2/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/$", 1,
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-2/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/.+$", -1,
      "part2File",
      "part2FileKO"),
     
     # directory with the third part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-3/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/$", 1,
      "part3Directory",
      "part3DirectoryKO"),
     
     # directory with the solutions to the third part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-3/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/.+$", -1,
      "part3File",
      "part3FileKO"),
 
