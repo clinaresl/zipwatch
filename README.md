@@ -52,7 +52,7 @@ pip install --upgrade SomeProject
 from a *configuration file*. This configuration file should provide
 the following data structure:
 
-* `schemaSpec`: it is a list of tuples, each one with four elements:
+* `schemaSpec`: it is a list of tuples, each one with three elements:
 
   + *Regular expression*: if any entry of the zip file matches the
     given regexp, then the *if-then* function declared in this tuple
