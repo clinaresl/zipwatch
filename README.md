@@ -58,9 +58,6 @@ the following data structure:
     given regexp, then the *if-then* function declared in this tuple
     is automatically executed
 	
-  + *Cardinality*: minimum number of times the regexp given should
-    match entries in the zip file.
-	
   + *If-then function*: function to be automatically invoked in case
     the given regexp matches any entry from the zip file
 	
@@ -80,6 +77,22 @@ expects directories with the words `__MACOSX` or `._Store` and if they
 ever appear, a function called `metadata` is invoked. In case no entry
 from the zip file matches this regular expression, no funcdtion is
 invoked as `""` was specified as an *if-else* function.
+
+*If-then* functions registered through a *specification schema* are
+automatically invoked with the following parameters:
+
+* *zipstream*: it is an instance of `zipFile.ZipFile` with information
+  of the zip file
+* *regexp*: regular expression matched given as a string
+* *content*: specific content found in the zip file that matched the
+  regular expression
+* *matches*: number of matches of this component
+
+*If-else* functions are automatically invoked with:
+
+* *component*: it is an instance of `zwcschema.ZWCSchemaComponent`
+  with information of the component that never matched any content of
+  the zip file.
 
 In addition, the configuration file should provide the definition of
 the following functions:

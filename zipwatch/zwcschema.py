@@ -28,16 +28,13 @@ class ZWCSchemaComponent:
 
     """
 
-    def __init__ (self, configFile, regexp, cardinality, if_then, if_else):
+    def __init__ (self, configFile, regexp, if_then, if_else):
         """registers a single component with:
 
         configFile - configuration file given as a Python module
 
         regexp - regular expression to be verified. It might contain
                  groups to be used by other functions
-
-        cardinality - number of times this regular expression can
-                      match
 
         if_then - action to take in case of matching
 
@@ -46,8 +43,8 @@ class ZWCSchemaComponent:
         """
 
         # copy the attributes
-        (self._configFile, self._regexp, self._cardinality, self._if_then, self._if_else) = \
-            (configFile, regexp, cardinality, if_then, if_else)
+        (self._configFile, self._regexp, self._if_then, self._if_else) = \
+            (configFile, regexp, if_then, if_else)
 
         # and initialize the number of matches to zero
         self._matches = 0
@@ -58,9 +55,8 @@ class ZWCSchemaComponent:
 
         stream = """ configFile : {0}
  regexp     : {1}
- cardinality: {2}
- if_then    : {3}
- if_else  : {4}""".format (self._configFile, self._regexp, self._cardinality, self._if_then, self._if_else)
+ if_then    : {2}
+ if_else  : {3}""".format (self._configFile, self._regexp, self._if_then, self._if_else)
 
         return stream
 
@@ -69,12 +65,6 @@ class ZWCSchemaComponent:
         """return the regexp of this component"""
 
         return self._regexp
-    
-
-    def get_cardinality (self):
-        """return the cardinality of this component"""
-
-        return self._cardinality
     
 
     def get_matches (self):
@@ -99,7 +89,7 @@ class ZWCSchemaComponent:
         # instance
         m = re.match (self._regexp, instance)
 
-        # if it matches update the cardinality
+        # if necessary, update the number of matches
         if m:
             self._matches += 1
 
@@ -116,12 +106,11 @@ class ZWCSchemaComponent:
         # this create a context with the values of all parameters passed to the
         # if-then function
         command = """import {0}
-{0}.{1} (zipstream, regexp, content, cardinality, matches)""".format (self._configFile, self._if_then)
+{0}.{1} (zipstream, regexp, content, matches)""".format (self._configFile, self._if_then)
         context = {
             'zipstream' : zipstream,
             'regexp' : self._regexp,
             'content' : content,
-            'cardinality' : self._cardinality,
             'matches' : self._matches
         }
         
@@ -177,14 +166,14 @@ class ZWCSchema:
             sys.exit (1)
         
         # error checking - verify now that all items of the schema are given as
-        # tuples with precisely four items each
+        # tuples with precisely three items each
         for ischema in schema:
             if not isinstance (ischema, tuple):
                 print (" Fatal error: the component '{0}' has not been given as a tuple".format (ischema))
                 sys.exit (1)
 
-            if len (ischema) != 4:
-                print (" Fatal error: the component '{0}' has not four arguments".format (ischema))
+            if len (ischema) != 3:
+                print (" Fatal error: the component '{0}' has an incorrect number of arguments".format (ischema))
                 sys.exit (1)
 
         # copy the zipstream and the configuration file
@@ -196,7 +185,7 @@ class ZWCSchema:
         self._components = list ()
         for ischema in schema:
             self._components.append (ZWCSchemaComponent (configFile,
-                                                         ischema[0], ischema[1], ischema[2], ischema[3]))
+                                                         ischema[0], ischema[1], ischema[2]))
             
 
     def __str__ (self):
@@ -233,21 +222,6 @@ class ZWCSchema:
                 # if this component matches this content
                 if icomponent.evaluate (icontent):
 
-                    # verify that the number of matches does not exceed the
-                    # given cardinality for it
-                    if icomponent.get_cardinality () > 0 and \
-                       icomponent.get_matches () > icomponent.get_cardinality ():
-                        print (""" Fatal error: The following component matched {0} times, which is more than its required cardinality, {1}
- Component:
- {2}
-
- Content:
- {3}
-
- INVALID ZIP FILE
-""".format (icomponent.get_matches (), icomponent.get_cardinality (), icomponent, icontent))
-                        sys.exit (1)
-
                     # if this component matched this content, then apply its
                     # if-then function if any was given
                     icomponent.executeIfThen (self._zipstream, icontent)
@@ -256,12 +230,9 @@ class ZWCSchema:
         # verify whether there are components of this schema that have not matched
         for icomponent in self._components:
 
-            # if the cardinality of matches of this component is below the
-            # required cardinality, then an action should be taken in case it
-            # was provided in the schema definition
-            if icomponent.get_cardinality () > 0 and \
-               icomponent.get_matches () < icomponent.get_cardinality () and \
-               icomponent._if_else:
+            # if this specific component never matched any entry of the zip file
+            # invoke its if-else function
+            if not icomponent.get_matches () and icomponent._if_else:
 
                 icomponent.executeIfElse ()
             

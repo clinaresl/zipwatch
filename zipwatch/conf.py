@@ -59,23 +59,19 @@ __version__  = '1.0'
 #    1. Regular expression that might be matched by one specific
 #       filename/directory in the zip file
 #
-#    2. Cardinality required for this component, e.g., if a file/directory
-#       should be found only once, this should take the value 1. If any number
-#       (including 0) is required, then given any negative value.
-#
-#    3. if-then action. It is a function provided in this file which should be
+#    2. if-then action. It is a function provided in this file which should be
 #       invoked if a specific file/directory matches the regular expression
 #       given in first position.
 #
 #       These functions receive the following arguments:
-#          1. Regular expression matched
-#          2. Specific content that matched the regular expression
-#          3. Cardinality of the associated component
+#          1. instance of a zipfile.ZipFile used to access the zip file
+#          2. Regular expression matched
+#          3. Specific content that matched the regular expression
 #          4. Number of matches of this component
 #
 #       if-then actions are mandatory
 #
-#    4. if-else action. It is a function provided in this file which should be
+#    3. if-else action. It is a function provided in this file which should be
 #       invoked in case no file/directory in the zip file matched the given
 #       expression.
 #
@@ -96,8 +92,7 @@ __version__  = '1.0'
 #    1. instance of a zipfile.ZipFile used to access the zip file
 #    2. Regular expression matched
 #    3. Specific content that matched the regular expression
-#    4. Cardinality of the associated component
-#    5. Number of matches of this component
+#    4. Number of matches of this component
 #
 # and can be used to do anything, e.g., registering data in a class that records
 # useful information from the zip file
@@ -155,50 +150,50 @@ __version__  = '1.0'
 schemaSpec = [
         
     # report in pdf format
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/(?P<nia3>\d{6})-(?P<nia4>\d{6})\.pdf$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/(?P<nia3>\d{6})-(?P<nia4>\d{6})\.pdf$",
      "report",
      "reportKO"),
     
     # authors 
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/autores\.txt$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/autores\.txt$",
      "authors",
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/$",
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/.+$",
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/$",
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/.+$",
      "part2File",
      "part2FileKO"),
     
     # directory with the third part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/$",
      "part3Directory",
      "part3DirectoryKO"),
     
     # directory with the solutions to the third part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/.+$",
      "part3File",
      "part3FileKO"),
 
     # warn the user in case (s)he is submitting metadata
-    ("(__MACOSX|\._Store)", -1,
+    ("(__MACOSX|\._Store)",
      "metadata",
      "")
     
@@ -355,13 +350,12 @@ def getStudentInfo (content):
 #    1. instance of a zipfile.ZipFile used to access the zip file
 #    2. Regular expression matched
 #    3. Specific content that matched the regular expression
-#    4. Cardinality of the associated component
-#    5. Number of matches of this component
+#    4. Number of matches of this component
 #
 # note that all contents certainly match the regexp
 
 # acknowledges the presence of the report
-def report (zipstream, regexp, content, cardinality, matches):
+def report (zipstream, regexp, content, matches):
     """acknowledges the presence of the report"""
 
     # verify the root directory
@@ -381,7 +375,7 @@ def report (zipstream, regexp, content, cardinality, matches):
     Summary._report = os.path.basename (content)
 
 # acknowledges the presence of the authors file
-def authors (zipstream, regexp, content, cardinality, matches):
+def authors (zipstream, regexp, content, matches):
     """acknowledges the presence of the authors file"""
 
     # verify the root directory
@@ -437,7 +431,7 @@ def authors (zipstream, regexp, content, cardinality, matches):
         
 
 # acknowledges the presence of the folder containing the first part
-def part1Directory (zipstream, regexp, content, cardinality, matches):
+def part1Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the first part"""
 
     # verify the root directory
@@ -448,7 +442,7 @@ def part1Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part1Directory = True
 
 # acknowledges the presence of a file in the folder containing the first part
-def part1File (zipstream, regexp, content, cardinality, matches):
+def part1File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the first part"""
 
     # verify the root directory
@@ -459,7 +453,7 @@ def part1File (zipstream, regexp, content, cardinality, matches):
     Summary._part1Files.append (os.path.basename (content))
 
 # acknowledges the presence of the folder containing the second part
-def part2Directory (zipstream, regexp, content, cardinality, matches):
+def part2Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the second part"""
 
     # verify the root directory
@@ -470,7 +464,7 @@ def part2Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part2Directory = True
 
 # acknowledges the presence of a file in the folder containing the second part
-def part2File (zipstream, regexp, content, cardinality, matches):
+def part2File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the second part"""
 
     # verify the root directory
@@ -481,7 +475,7 @@ def part2File (zipstream, regexp, content, cardinality, matches):
     Summary._part2Files.append (os.path.basename (content))
 
 # acknowledges the presence of the folder containing the third part
-def part3Directory (zipstream, regexp, content, cardinality, matches):
+def part3Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the third part"""
 
     # verify the root directory
@@ -492,7 +486,7 @@ def part3Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part3Directory = True
 
 # acknowledges the presence of a file in the folder containing the third part
-def part3File (zipstream, regexp, content, cardinality, matches):
+def part3File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the third part"""
 
     # verify the root directory
@@ -504,7 +498,7 @@ def part3File (zipstream, regexp, content, cardinality, matches):
 
     
 # warn the user in case (s)he is submitting metadat
-def metadata (zipstream, regexp, content, cardinality, matches):
+def metadata (zipstream, regexp, content, matches):
     """warn the user in case (s)he is submitting metadata"""
 
     print (" Warning: your zip file contains metadata (__MACOSX/ and .DS_Store) which are neither required")

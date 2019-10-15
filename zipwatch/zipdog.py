@@ -185,20 +185,21 @@ def verifyConfigFile (configFile):
     # verify that all functions given in the schema specification are also implemented
     for ischema in accessList (configFile, "schemaSpec"):
 
-        if len (ischema) != 4:
+        if len (ischema) != 3:
             print (" Fatal error: the schema '{0}' from 'schemaSpec' has an incorrect number of arguments".format (ischema))
             sys.exit (1)
 
-        # note that while the schema should consist of precisely four arguments,
-        # it is possible to give the empty string as an if-then function
-        if ischema[2] and not checkFunction (configFile, ischema[2]):
-            print (" Fatal error: the if-then function '{0}' has not been found in module '{1}'".format (ischema[2], configFile))
+        # note that while the schema should consist of precisely three
+        # arguments, it is possible to give the empty string as an if-then
+        # function
+        if ischema[1] and not checkFunction (configFile, ischema[1]):
+            print (" Fatal error: the if-then function '{0}' has not been found in module '{1}'".format (ischema[1], configFile))
             sys.exit (1)
 
         # likewise, it is also allowed to specify the empty string as an else
         # function
-        if ischema[3] and not checkFunction (configFile, ischema[3]):
-            print (" Fatal error: the if-else function '{0}' has not been found in module '{1}'".format (ischema[3], configFile))
+        if ischema[2] and not checkFunction (configFile, ischema[2]):
+            print (" Fatal error: the if-else function '{0}' has not been found in module '{1}'".format (ischema[2], configFile))
             sys.exit (1)
     
     # check the existence of the mandatory functions

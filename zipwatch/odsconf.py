@@ -61,23 +61,18 @@ __version__  = '1.0'
 #    1. Regular expression that might be matched by one specific
 #       filename/directory in the zip file
 #
-#    2. Cardinality required for this component, e.g., if a file/directory
-#       should be found only once, this should take the value 1. If any number
-#       (including 0) is required, then given any negative value.
-#
-#    3. if-then action. It is a function provided in this file which should be
+#    2. if-then action. It is a function provided in this file which should be
 #       invoked if a specific file/directory matches the regular expression
 #       given in first position.
 #
 #       These functions receive the following arguments:
 #          1. Regular expression matched
 #          2. Specific content that matched the regular expression
-#          3. Cardinality of the associated component
-#          4. Number of matches of this component
+#          3. Number of matches of this component
 #
 #       if-then actions are mandatory
 #
-#    4. if-else action. It is a function provided in this file which should be
+#    3. if-else action. It is a function provided in this file which should be
 #       invoked in case no file/directory in the zip file matched the given
 #       expression.
 #
@@ -98,8 +93,7 @@ __version__  = '1.0'
 #    1. instance of a zipfile.ZipFile used to access the zip file
 #    2. Regular expression matched
 #    3. Specific content that matched the regular expression
-#    4. Cardinality of the associated component
-#    5. Number of matches of this component
+#    4. Number of matches of this component
 #
 # and can be used to do anything, e.g., registering data in a class that records
 # useful information from the zip file
@@ -157,52 +151,52 @@ __version__  = '1.0'
 schemaSpec = [
         
     # report in pdf format
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/(?P<nia3>\d{6})-(?P<nia4>\d{6})\.pdf$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/(?P<nia3>\d{6})-(?P<nia4>\d{6})\.pdf$",
      "report",
      "reportKO"),
     
     # authors 
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/autores\.txt$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/autores\.txt$",
      "authors",
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-1/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/$",
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-1/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-1/.+$",
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-2/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/$",
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-2/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-2/.+$",
      "part2File",
      "part2FileKO"),
     
     # directory with the third part of the lab assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-3/$", 1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/$",
      "part3Directory",
      "part3DirectoryKO"),
     
     # directory with the solutions to the third part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/part-3/.+$", -1,
+    ("p1-(?P<nia1>\d{6})-(?P<nia2>\d{6})/parte-3/.+$",
      "part3File",
      "part3FileKO"),
 
     # warn the user in case (s)he is submitting metadata
-    ("(__MACOSX|\._Store)", -1,
+    ("(__MACOSX|\._Store)",
      "metadata",
-     "")
+     None)
     
 ]
 
@@ -292,18 +286,18 @@ class ODSContent:
     """Records all the information to be shown on a single line of the
        spreadsheet"""
 
-    def __init__ (self, nia, surname, name, libreoffice, mathprog, extra):
+    def __init__ (self, nia, surname, name, model, libreoffice, mathprog, extra):
         """records the information to be shown for a single student with information
            extracted from the zip file"""
 
         # record all attributes
-        (self._nia, self._surname, self._name, self._libreoffice, self._mathprog, self._extra) = \
-            (nia, surname, name, libreoffice, mathprog, extra)
+        (self._nia, self._surname, self._name, self._model, self._libreoffice, self._mathprog, self._extra) = \
+            (nia, surname, name, model, libreoffice, mathprog, extra)
 
     def get (self):
         """returns a list with the information of this instance"""
 
-        return [self._nia, self._surname, self._name, self._libreoffice, self._mathprog, self._extra]
+        return [self._nia, self._surname, self._name, self._model, self._libreoffice, self._model, self._mathprog, self._extra]
         
 
 # -----------------------------------------------------------------------------
@@ -316,6 +310,13 @@ class ODSContents:
 
     _entries = []
 
+    def __add__ (self, other):
+        """adds a new entry to this collection"""
+
+        self._entries.append (other)
+        return self
+    
+    
     def __str__ (self):
         """provides a human readable version of the contents of this class"""
 
@@ -399,13 +400,12 @@ def getStudentInfo (content):
 #    1. instance of a zipfile.ZipFile used to access the zip file
 #    2. Regular expression matched
 #    3. Specific content that matched the regular expression
-#    4. Cardinality of the associated component
-#    5. Number of matches of this component
+#    4. Number of matches of this component
 #
 # note that all contents certainly match the regexp
 
 # acknowledges the presence of the report
-def report (zipstream, regexp, content, cardinality, matches):
+def report (zipstream, regexp, content, matches):
     """acknowledges the presence of the report"""
 
     # verify the root directory
@@ -425,7 +425,7 @@ def report (zipstream, regexp, content, cardinality, matches):
     Summary._report = os.path.basename (content)
 
 # acknowledges the presence of the authors file
-def authors (zipstream, regexp, content, cardinality, matches):
+def authors (zipstream, regexp, content, matches):
     """acknowledges the presence of the authors file"""
 
     # verify the root directory
@@ -481,7 +481,7 @@ def authors (zipstream, regexp, content, cardinality, matches):
         
 
 # acknowledges the presence of the folder containing the first part
-def part1Directory (zipstream, regexp, content, cardinality, matches):
+def part1Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the first part"""
 
     # verify the root directory
@@ -492,7 +492,7 @@ def part1Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part1Directory = True
 
 # acknowledges the presence of a file in the folder containing the first part
-def part1File (zipstream, regexp, content, cardinality, matches):
+def part1File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the first part"""
 
     # verify the root directory
@@ -503,7 +503,7 @@ def part1File (zipstream, regexp, content, cardinality, matches):
     Summary._part1Files.append (os.path.basename (content))
 
 # acknowledges the presence of the folder containing the second part
-def part2Directory (zipstream, regexp, content, cardinality, matches):
+def part2Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the second part"""
 
     # verify the root directory
@@ -514,7 +514,7 @@ def part2Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part2Directory = True
 
 # acknowledges the presence of a file in the folder containing the second part
-def part2File (zipstream, regexp, content, cardinality, matches):
+def part2File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the second part"""
 
     # verify the root directory
@@ -525,7 +525,7 @@ def part2File (zipstream, regexp, content, cardinality, matches):
     Summary._part2Files.append (os.path.basename (content))
 
 # acknowledges the presence of the folder containing the third part
-def part3Directory (zipstream, regexp, content, cardinality, matches):
+def part3Directory (zipstream, regexp, content, matches):
     """acknowledges the presence of the folder containing the third part"""
 
     # verify the root directory
@@ -536,7 +536,7 @@ def part3Directory (zipstream, regexp, content, cardinality, matches):
     Summary._part3Directory = True
 
 # acknowledges the presence of a file in the folder containing the third part
-def part3File (zipstream, regexp, content, cardinality, matches):
+def part3File (zipstream, regexp, content, matches):
     """acknowledges the presence of a file in the folder containing the third part"""
 
     # verify the root directory
@@ -548,7 +548,7 @@ def part3File (zipstream, regexp, content, cardinality, matches):
 
     
 # warn the user in case (s)he is submitting metadat
-def metadata (zipstream, regexp, content, cardinality, matches):
+def metadata (zipstream, regexp, content, matches):
     """warn the user in case (s)he is submitting metadata"""
 
     print (" Warning: your zip file contains metadata (__MACOSX/ and .DS_Store) which are neither required")
@@ -581,7 +581,7 @@ def reportKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
-    sys.exit (1)
+    Summary._report = None
     
 # reports that the authors file has not been provided
 def authorsKO (component):
@@ -596,6 +596,8 @@ def authorsKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
+    # this is considered a system error because there is no one to attribute the
+    # error so that execution should immediately halt
     sys.exit (1)
     
 # reports that the folder containing the first part has not been found
@@ -608,6 +610,8 @@ def part1DirectoryKO (component):
     print ("          this does not invalidate your .zip file but be warned that your first part will score 0")
     print ()
 
+    Summary._part1Directory = False
+
 # reports that the folder containing the first part contains no files
 def part1FileKO (component):
     """reports that the folder containing the first part contains no files.
@@ -618,6 +622,8 @@ def part1FileKO (component):
     print ("          this does not invalidate your .zip file but be warned that your first part will score 0")
     print ()
 
+    Summary._part1Files = []
+    
 # reports that the folder containing the second part has not been found
 def part2DirectoryKO (component):
     """reports that the folder containing the second part has not been found.
@@ -627,6 +633,8 @@ def part2DirectoryKO (component):
     print (" Warning: the folder with the second part 'parte-2/' has not been found")
     print ("          this does not invalidate your .zip file but be warned that your second part will score 0")
     print ()
+
+    Summary._part2Directory = False
 
 # reports that the folder containing the second part contains no files
 def part2FileKO (component):
@@ -638,6 +646,8 @@ def part2FileKO (component):
     print ("          this does not invalidate your .zip file but be warned that your second part will score 0")
     print ()
 
+    Summary._part2Files = []
+    
 # reports that the folder containing the third part has not been found
 def part3DirectoryKO (component):
     """reports that the folder containing the second part has not been found.
@@ -649,6 +659,8 @@ def part3DirectoryKO (component):
     print ("          the extra point granted for doing this part of the lab assignment")
     print ()
 
+    Summary._part3Directory = False
+    
 # reports that the folder containing the third part contains no files
 def part3FileKO (component):
     """reports that the folder containing the third part contains no files.
@@ -660,6 +672,7 @@ def part3FileKO (component):
     print ("          the extra point granted for doing this part of the lab assignment")
     print ()
     
+    Summary._part3Files = []
 
 # preamble
 # -----------------------------------------------------------------------------
@@ -716,17 +729,19 @@ def showSummary ():
 def tearDown ():
     """add a new entry to the contents to be shown on the ods file"""
 
+    odscontents = ODSContents ()
+    
     # determine the entries of a new line in the spreadsheet
+    model       = "" if Summary._report else "0"
     libreoffice = "" if Summary._part1Files else "0"
     mathprog    = "" if Summary._part2Files else "0"
     dynamicprog = "1" if Summary._part3Files else "0"
     
-    odsline1 = ODSContent (Summary._nia1, Summary._surname1, Summary._name1, libreoffice, mathprog, dynamicprog)
-    ODSContents._entries.append (odsline1)
+    odsline1 = ODSContent (Summary._nia1, Summary._surname1, Summary._name1, model, libreoffice, mathprog, dynamicprog)
+    odscontents = odscontents + odsline1
 
-    odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, libreoffice, mathprog, dynamicprog)
-    ODSContents._entries.append (odsline2)
-
+    odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, model, libreoffice, mathprog, dynamicprog)
+    odscontents = odscontents + odsline2
 
     
 # epilogue
@@ -741,7 +756,7 @@ def epilogue ():
     for entry in ODSContents._entries:
 
         # add the information of this entry
-        contents.append ([entry._nia, entry._surname, entry._name, "", entry._libreoffice, "", entry._mathprog, "", entry._extra, "-"])
+        contents.append ([entry._nia, entry._surname, entry._name, entry._model, entry._libreoffice, entry._model, entry._mathprog, entry._model, entry._extra, "-"])
 
     # create a sheet with these contents along with their column names
     sheet = pyexcel.get_sheet (array=contents)
