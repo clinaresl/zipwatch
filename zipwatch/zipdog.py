@@ -19,14 +19,11 @@ __version__  = '1.0'
 
 # imports
 # -----------------------------------------------------------------------------
-import argparse                 # argument parsing
-import inspect                    # inspect python modules
-import os                         # file handling
+import argparse                   # argument parsing
 import sys                        # system accessing
 import zipfile                    # zip files management
 
-from pathlib import Path          # path handling
-
+import zwcconfig
 import zwcschema
 
 
@@ -75,141 +72,6 @@ def createArgParser ():
     return parser
     
 
-# verifies the name of the configuration file and returns a valid
-# namespace for it
-# -----------------------------------------------------------------------------
-def checkConfigFile (configFile):
-    """verifies the name of the configuration file and returns a valid
-       namespace for it
-
-    """
-
-    # create an instance of a path with the given configuration file
-    pathconfig = Path (configFile)
-
-    # verify the file exists and it is accessible
-    try:
-        my_abs_path = pathconfig.resolve (strict=True)
-
-    except FileNotFoundError:
-
-        # if it does not exist
-        print ("Fatal error: the file '{0}' does not exist or it is not accessible".format (configFile))
-        sys.exit (1)
-        
-    else:
-        
-        # yeah, it exists, get then its namespace name
-        return os.path.splitext (os.path.basename (configFile))[0]
-
-    
-# returns the contents of the specified list from the given component. The
-# component should exist, otherwise the result is undefined
-# -----------------------------------------------------------------------------
-def accessList (module, component):
-    """returns the contents of the specified list from the given component. The
-       component should exist, otherwise the result is undefined
-
-    """
-
-    # create python statements and execute them within an empty context
-    command = """import {0}
-
-lstHandler = {0}.{1}
-""".format (module, component)
-    context = dict ()
-    exec (command, context)
-
-    # now, return the contents of the list
-    return context["lstHandler"]
-    
-
-# verifies the given component names a list from the given module
-# -----------------------------------------------------------------------------
-def checkList (module, component):
-    """verifies the given component names a list from the given module
-
-    """
-
-    # create python statements and execute them within an empty context
-    command = """import inspect
-import {0}
-
-{1}_exists = hasattr({0}, \"{1}\")
-{1}_is_a_list = {1}_exists and isinstance ({0}.{1}, list)
-""".format (module, component)
-    context = dict ()
-    exec (command, context)
-
-    # now, retrive from the context whether: first, the component exists and
-    # second, it is defined as a list
-    return context["{0}_exists".format (component)] and context["{0}_is_a_list".format (component)]
-    
-
-# verifies the given component names a function from the given module
-# -----------------------------------------------------------------------------
-def checkFunction (module, component):
-    """verifies the given component names a function from the given module
-
-    """
-
-    # create python statements and execute them within an empty context
-    command = """import inspect
-import {0}
-
-{1}_exists = hasattr({0}, \"{1}\")
-{1}_is_function = {1}_exists and inspect.isfunction ({0}.{1})
-""".format (module, component)
-    context = dict ()
-    exec (command, context)
-
-    # now, retrive from the context whether: first, the component exists and
-    # second, it is defined as a function
-    return context["{0}_exists".format (component)] and context["{0}_is_function".format (component)]
-    
-
-# verifies the contents of the configFile, i.e., that all necessary functions
-# and data structures are given
-# -----------------------------------------------------------------------------
-def verifyConfigFile (configFile):
-    """verifies the contents of the configFile, i.e., that all necessary functions
-       and data structures are given
-
-    """
-
-    # check the existence of the list schemaSpec
-    if not checkList (configFile, "schemaSpec"):
-        print (" Fatal error: the component 'schemaSpec' has not been found in module '{0}'".format (configFile))
-        sys.exit (1)
-
-    # verify that all functions given in the schema specification are also implemented
-    for ischema in accessList (configFile, "schemaSpec"):
-
-        if len (ischema) != 3:
-            print (" Fatal error: the schema '{0}' from 'schemaSpec' has an incorrect number of arguments".format (ischema))
-            sys.exit (1)
-
-        # note that while the schema should consist of precisely three
-        # arguments, it is possible to give the empty string as an if-then
-        # function
-        if ischema[1] and not checkFunction (configFile, ischema[1]):
-            print (" Fatal error: the if-then function '{0}' has not been found in module '{1}'".format (ischema[1], configFile))
-            sys.exit (1)
-
-        # likewise, it is also allowed to specify the empty string as an else
-        # function
-        if ischema[2] and not checkFunction (configFile, ischema[2]):
-            print (" Fatal error: the if-else function '{0}' has not been found in module '{1}'".format (ischema[2], configFile))
-            sys.exit (1)
-    
-    # check the existence of the mandatory functions
-    for icomponent in ["preamble", "setUp", "showSummary", "tearDown", "epilogue"]:
-    
-        if not checkFunction (configFile, icomponent):
-            print (" Fatal error: the component '{0}' has not been found in module '{1}'".format (icomponent, configFile))
-            sys.exit (1)
-    
-
 # main
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -225,14 +87,12 @@ if __name__ == '__main__':
     # invoke the parser and parse all commands
     params = createArgParser ().parse_args ()
 
-    # check the configuration file and verify its contents
-    configFile = checkConfigFile (params.configuration)
-    verifyConfigFile (configFile)
+    # create a configuration file and verify all its contents
+    configFile = zwcconfig.ZWCConfigFile (params.configuration)
+    configFile.verify ()
 
     # invoke the preamble before starting the whole process
-    command = """import {0}
-{0}.preamble ()""".format (configFile)
-    exec (command)        
+    configFile.preamble
         
     # for all files given in the command-line
     for ifile in params.files:
@@ -244,32 +104,25 @@ if __name__ == '__main__':
         with zipfile.ZipFile (ifile) as zipstream:
 
             # execute the pramble of the configuration file
-            command = """import {0}
-{0}.setUp ()""".format (configFile)
-            exec (command)
+            configFile.setUp
             
             # create a schema from the specification given in the
             # configuration file
-            schema = zwcschema.ZWCSchema (zipstream, accessList (configFile, "schemaSpec"), configFile)
+            schema = zwcschema.ZWCSchema (zipstream, configFile.getList ("schemaSpec"), configFile)
     
             # evaluate the contents of this zip file against the schema
             schema.evaluate (zipstream.namelist ())
 
             # execute also the tearDown
-            command = "{0}.tearDown ()".format (configFile)
-            eval (command)
+            configFile.tearDown
             
             # if requested, show a summary with all the information extracted
             # from the zip file
             if (params.show_summary):
-
-                command = "{0}.showSummary ()".format (configFile)
-                eval (command)
+                configFile.onSummary
         
     # invoke the epilogue after the whole process
-    command = """import {0}
-{0}.epilogue ()""".format (configFile)
-    exec (command)        
+    configFile.epilogue
         
 
                 

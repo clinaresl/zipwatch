@@ -9,7 +9,7 @@
 #
 
 """
-Configuration file for lab assignment #1 - Heuristics and Optimization
+Configuration file for lab assignment #1 (student version) - Heuristics and Optimization
 """
 
 # imports
@@ -38,12 +38,14 @@ __version__  = '1.0'
 #       preamble: to be invoked only once at the beginning of the session
 #       setUp: to be invoked before examining the contents of the next zip
 #              file. It is thus invoked once for each zip file
-#       showSummary: to be invoked once if and only if the user requests
-#                    a summary to be shown
 #       tearDown: to be invoked after examining the contents of the last zip
 #                 file. It is thus invoked once for each zip file
 #       epilogue: to be invoked once as soon as the whole process is over
-
+#       onSummary: to be invoked once if and only if the user requests a summary
+#                  to be shown
+#       onError: automatically invoked by zipwatch in case of error, e.g.,
+#                invalid zip file. It can be also invoked by services
+#                implemented in this module
 #
 # even if these fnctions are not necessary they should be implemented (with only
 # statement: 'pass')
@@ -117,11 +119,17 @@ __version__  = '1.0'
 # zipfile. It can be used to initialize structures. If nothing should be done
 # then it should be provided with "pass"
 
-# showSummary
+# onSummary
 # -----------------------------------------------------------------------------
 # this function is mandatory and should be provided in this module. It would be
 # invoked automatically by zipwatch in case the user explicitly requested seeing
 # a summary of all the relevant information extracted from the zip file
+
+# onError
+# -----------------------------------------------------------------------------
+# this function is mandatory and should be provided in this module. It is
+# invoked automatically by zipwatch in case of error, e.g., bad zip file. It
+# could be also invoked by services implemented in this module
 
 # tearDown
 # -----------------------------------------------------------------------------
@@ -141,7 +149,7 @@ __version__  = '1.0'
 # -----------------------------------------------------------------------------
 # other than the contents depicted above, it is possible to provide here
 # additional functions/classes or functions/classes imported from other modules
-# that can be used in the evaluation of the if-then/if-else/showSummary
+# that can be used in the evaluation of the if-then/if-else/onSummary/onError
 # functions that have to be provided
 
 # SCHEMA DEFINITION:
@@ -212,6 +220,10 @@ class Summary:
 
     # by registering all the information in static data members there
     # is no need to move back and forth instances of this class
+
+    # this class records information of a team which is made of either two
+    # students or only one (which is not desired, certainly but that might be
+    # eventually the case)
     _nia1 = 0
     _nia2 = 0
 
@@ -239,10 +251,13 @@ class Summary:
         stream += " * Surname1: {0}\n".format (Summary._surname1)
         stream += " * Name1   : {0}\n".format (Summary._name1)
         stream += "\n"
-        stream += " * NIA2: {0}\n".format (Summary._nia2)
-        stream += " * Surname2: {0}\n".format (Summary._surname2)
-        stream += " * Name2   : {0}\n".format (Summary._name2)
-        stream += "\n"
+
+        # in case there is a second student registered
+        if Summary._nia2:
+            stream += " * NIA2: {0}\n".format (Summary._nia2)
+            stream += " * Surname2: {0}\n".format (Summary._surname2)
+            stream += " * Name2   : {0}\n".format (Summary._name2)
+            stream += "\n"
 
         stream += " * Report  : {0}\n".format (Summary._report)
         stream += "\n"
@@ -277,7 +292,7 @@ class Summary:
         return stream
     
 
-# additional classes
+# Functions
 # -----------------------------------------------------------------------------
 
 # verifies the root directory of the specified contents
@@ -315,7 +330,7 @@ def verifyRootDirectory (content):
         sys.exit (1)
 
     # finally, if no NIAs have been registered yet, do now
-    if not Summary._nia1 or not Summary._nia2:
+    if not Summary._nia1 and not Summary._nia2:
         (Summary._nia1, Summary._nia2) = (nia1, nia2)
     
 # retrieve the name, surname and NIA of a student from the contents of the
@@ -526,7 +541,7 @@ def reportKO (component):
     print ("              location. Make sure to locate the pdf report in the root directory. The name should")
     print ("              adhere to the regular expression given below")
     print ()
-    print (" Regular expression: {0}".format (component.get_regexp ()))
+    print (" Regular expression: {0}".format (component.getRegexp ()))
     print (" Example           : p1-346089-330696/346089-330696.pdf")
     print ()
     print (" INVALID ZIP FILE!")
@@ -541,7 +556,7 @@ def authorsKO (component):
     print ("              Make sure to locate the authors file in the root directory. The name should adhere")
     print ("              to the regular expression given below")
     print ()
-    print (" Regular expression: {0}".format (component.get_regexp ()))
+    print (" Regular expression: {0}".format (component.getRegexp ()))
     print (" Example           : p1-346089-330696/autores.txt")
     print ()
     print (" INVALID ZIP FILE!")
@@ -605,10 +620,14 @@ def part3FileKO (component):
 
        This is not a fatal error, but the user should be warned much the same"""
 
-    print (" Warning: the folder with the third part 'parte-3/' contains no files")
-    print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
-    print ("          the extra point granted for doing this part of the lab assignment")
-    print ()
+    # show the message only in case the directory was found, otherwise, it is
+    # obvious there are no files within an unexistent directory! ;)
+    if (Summary._part3Directory):
+    
+        print (" Warning: the folder with the third part 'parte-3/' contains no files")
+        print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
+        print ("          the extra point granted for doing this part of the lab assignment")
+        print ()
     
 
 # preamble
@@ -647,16 +666,6 @@ def setUp ():
     Summary._part3Files = []
     
 
-# showSummary
-# -----------------------------------------------------------------------------
-
-# shows a report summary of all info extracted from the zip file
-def showSummary ():
-    """shows a report summary of all info extracted from the zip file"""
-
-    summary = Summary ()
-    print (summary)
-
 # tearDown
 # -----------------------------------------------------------------------------
 def tearDown ():
@@ -671,6 +680,20 @@ def epilogue ():
 
     pass
 
+# onSummary
+# -----------------------------------------------------------------------------
+def onSummary ():
+    """shows a report summary of all info extracted from the zip file"""
+
+    summary = Summary ()
+    print (summary)
+
+# onError
+# -----------------------------------------------------------------------------
+def onError ():
+    """take an action in case of error such as bad zip file"""
+
+    pass
 
 
 

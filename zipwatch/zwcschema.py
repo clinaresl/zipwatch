@@ -18,6 +18,8 @@ import re                       # matching regular expressions
 import sys                      # system accessing
 import zipfile                  # zip files management
 
+import zwcconfig
+
 # -----------------------------------------------------------------------------
 # ZWCSchemaComponent
 #
@@ -31,7 +33,7 @@ class ZWCSchemaComponent:
     def __init__ (self, configFile, regexp, if_then, if_else):
         """registers a single component with:
 
-        configFile - configuration file given as a Python module
+        configFile - configuration file given as an instance of ZWCConfigFile
 
         regexp - regular expression to be verified. It might contain
                  groups to be used by other functions
@@ -56,32 +58,26 @@ class ZWCSchemaComponent:
         stream = """ configFile : {0}
  regexp     : {1}
  if_then    : {2}
- if_else  : {3}""".format (self._configFile, self._regexp, self._if_then, self._if_else)
+ if_else  : {3}""".format (self._configFile.getNamespace (), self._regexp, self._if_then, self._if_else)
 
         return stream
 
 
-    def get_regexp (self):
-        """return the regexp of this component"""
-
-        return self._regexp
-    
-
-    def get_matches (self):
+    def getMatches (self):
         """return the number of matches of this component"""
 
         return self._matches
     
 
-    def set_matches (self, value):
-        """set the number of matches of this component to the given value"""
+    def getRegexp (self):
+        """return the regexp defined in this component"""
 
-        self._matches = value
+        return self._regexp
     
 
     def evaluate (self, instance):
-        """returns whether the given instance is verified by this
-           component. If so, the number of matches is incremented
+        """returns whether the given instance is verified by this component. If so, the
+           number of matches is incremented
 
         """
 
@@ -95,6 +91,7 @@ class ZWCSchemaComponent:
 
         # finally return whether there was a match or not
         return m != None
+    
 
     def executeIfThen (self, zipstream, content):
         """execute the if-then registered function of this component for the content
@@ -102,19 +99,18 @@ class ZWCSchemaComponent:
 
         """
 
-        # just execute the if-then function registered in this component. For
-        # this create a context with the values of all parameters passed to the
-        # if-then function
-        command = """import {0}
-{0}.{1} (zipstream, regexp, content, matches)""".format (self._configFile, self._if_then)
+        # execute the if-then function registered for this component within the
+        # configuration file. For this, create a context with the values of all
+        # parameters passed to the if-then function
+        command = """{0}.{1} (zipstream, regexp, content, matches)""".format (self._configFile.getNamespace (),
+                                                                              self._if_then)
         context = {
             'zipstream' : zipstream,
             'regexp' : self._regexp,
             'content' : content,
             'matches' : self._matches
         }
-        
-        exec (command, context)
+        self._configFile.execute (command, context)
     
 
     def executeIfElse (self):
@@ -123,16 +119,15 @@ class ZWCSchemaComponent:
 
         """
 
-        # just execute the if-then function registered in this component. For
-        # this create a context with the values of all parameters passed to the
-        # if-then function
-        command = """import {0}
-{0}.{1} (component)""".format (self._configFile, self._if_else)
+        # execute the if-else function registered for this component within the
+        # configuration file. For this, create a context with the values of all
+        # parameters passed to the if-else function
+        command = """{0}.{1} (component)""".format (self._configFile.getNamespace (),
+                                                    self._if_else)
         context = {
             'component' : self
         }
-        
-        exec (command, context)
+        self._configFile.execute (command, context)
     
 
 # -----------------------------------------------------------------------------
@@ -146,7 +141,8 @@ class ZWCSchema:
 
     def __init__ (self, zipstream, schema, configFile):
         """Initializes a schema for processing a zipfile from the contents of a list of
-           tuples using those definitions specified in the given configuration file
+           tuples using those definitions specified in the given configuration
+           file ---given as an instance of ZWCConfigFile
 
         """
 
@@ -176,6 +172,12 @@ class ZWCSchema:
                 print (" Fatal error: the component '{0}' has an incorrect number of arguments".format (ischema))
                 sys.exit (1)
 
+        # error checking - verify the config file has been given as an instance
+        # of ZWCConfigFile
+        if not isinstance (configFile, zwcconfig.ZWCConfigFile):
+            print (" Fatal error: the config file is not an instance of a ZWCConfigFile")
+            sys.exit (1)
+                        
         # copy the zipstream and the configuration file
         self._zipstream = zipstream
         self._configFile = configFile
@@ -232,7 +234,7 @@ class ZWCSchema:
 
             # if this specific component never matched any entry of the zip file
             # invoke its if-else function
-            if not icomponent.get_matches () and icomponent._if_else:
+            if not icomponent.getMatches () and icomponent._if_else:
 
                 icomponent.executeIfElse ()
             
