@@ -78,12 +78,6 @@ if __name__ == '__main__':
 
     # --initialization
 
-    # first of all, verify just if show-schema has been requested
-    if '--show-schema' in sys.argv or \
-       '-S' in sys.argv:
-        print (schema)
-        sys.exit (0)
-
     # invoke the parser and parse all commands
     params = createArgParser ().parse_args ()
 
@@ -94,6 +88,17 @@ if __name__ == '__main__':
     # invoke the preamble before starting the whole process
     configFile.preamble
         
+    # check whether show-schema has been requested
+    if '--show-schema' in sys.argv or \
+       '-S' in sys.argv:
+        
+        # create a schema from the specification given in the configuration file
+        # but attached to no zipstream ---as none has been opened and none
+        # should be opened
+        schema = zwcschema.ZWCSchema (None, configFile.getList ("schemaSpec"), configFile)
+        print (schema)
+        sys.exit (0)
+
     # for all files given in the command-line
     for ifile in params.files:
 
@@ -122,6 +127,11 @@ if __name__ == '__main__':
                 if (params.show_summary):
                     configFile.onSummary
 
+        # in case of SystemExit, there is nothing to do as that should usually
+        # come from the configuration file aborting executing
+        except SystemExit:
+            print (" Aborting ...")
+    
         # in case of error, invoke 'onError' with the string generated in the
         # exception
         except:

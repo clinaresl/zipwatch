@@ -226,7 +226,7 @@ class Summary:
     # students or only one (which is not desired, certainly but that might be
     # eventually the case)
     _nia1 = 0
-    _nia2 = 0
+    _nia2 = None
 
     _name1 = ""
     _surname1 = ""
@@ -255,7 +255,7 @@ class Summary:
 
         # in case there is a second student registered
         if Summary._nia2:
-            stream += " * NIA2: {0}\n".format (Summary._nia2)
+            stream += " * NIA2    : {0}\n".format (Summary._nia2)
             stream += " * Surname2: {0}\n".format (Summary._surname2)
             stream += " * Name2   : {0}\n".format (Summary._name2)
             stream += "\n"
@@ -368,7 +368,7 @@ def verifyRootDirectory (content):
         print ()
         print (" INVALID ZIP FILE!")
 
-        sys.exit (1)
+        raise SystemExit
 
     # if the content matched this expression verify that NIAs are used
     # consistently
@@ -382,7 +382,7 @@ def verifyRootDirectory (content):
         print ("              the same used in the 'authors.txt' file")
         print ()
 
-        sys.exit (1)
+        raise SystemExit
 
     # finally, if no NIAs have been registered yet, do now
     if not Summary._nia1 and not Summary._nia2:
@@ -406,7 +406,7 @@ def getStudentInfo (content):
         print ()
         print ("INVALID ZIP FILE")
 
-        sys.exit (1)
+        raise SystemExit
 
     # otherwise, return the fields
     return (m.group ('nia'), m.group ('surname'), m.group ('name'))
@@ -439,7 +439,7 @@ def report (zipstream, regexp, content, matches):
     if ((nia1 != nia3 and nia1 != nia4) or
         (nia2 != nia3 and nia2 != nia4)):
         print (" Fatal error: mismatched NIAs in the report. Missed coincidence with the directory name")
-        sys.exit (1)
+        raise SystemExit
         
     # record the presence of the report
     Summary._report = os.path.basename (content)
@@ -483,7 +483,7 @@ def authors (zipstream, regexp, content, matches):
             print ("              the same used in the 'authors.txt' file")
             print ()
 
-            sys.exit (1)
+            raise SystemExit
 
         # if no NIAs have been registered yet, do now
         if not Summary._nia1 and not Summary._nia2:
@@ -621,7 +621,7 @@ def authorsKO (component):
 
     # this is considered a system error because there is no one to attribute the
     # error so that execution should immediately halt
-    sys.exit (1)
+    raise SystemExit
     
 # reports that the folder containing the first part has not been found
 def part1DirectoryKO (component):
@@ -726,7 +726,7 @@ def setUp ():
 
     # initialize the static data members of the Summary
     Summary._nia1 = 0
-    Summary._nia2 = 0
+    Summary._nia2 = None
 
     Summary._name1 = ""
     Summary._surname1 = ""
@@ -764,8 +764,10 @@ def tearDown ():
     odsline1 = ODSContent (Summary._nia1, Summary._surname1, Summary._name1, model, libreoffice, mathprog, dynamicprog)
     odscontents = odscontents + odsline1
 
-    odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, model, libreoffice, mathprog, dynamicprog)
-    odscontents = odscontents + odsline2
+    # if and only if two members are in this group then create an entry for both
+    if Summary._nia2:
+        odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, model, libreoffice, mathprog, dynamicprog)
+        odscontents = odscontents + odsline2
 
     
 # epilogue
@@ -802,7 +804,7 @@ def onSummary ():
 def onError (msg):
     """take an action in case of error such as bad zip file"""
 
-    pring msg
+    print (msg)
 
     
 

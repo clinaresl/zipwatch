@@ -255,7 +255,7 @@ class Summary:
 
         # in case there is a second student registered
         if Summary._nia2:
-            stream += " * NIA2: {0}\n".format (Summary._nia2)
+            stream += " * NIA2    : {0}\n".format (Summary._nia2)
             stream += " * Surname2: {0}\n".format (Summary._surname2)
             stream += " * Name2   : {0}\n".format (Summary._name2)
             stream += "\n"
@@ -310,11 +310,11 @@ def verifyRootDirectory (content):
         print ("              the regular expression given below")
         print ()
         print (" Regular expression: '{0}'".format (rootregexp))
-        print (" Example           : p1-346089-330696/")
+        print (" Examples          : p1-743902/, p1-346089-330696/")
         print ()
         print (" INVALID ZIP FILE!")
 
-        sys.exit (1)
+        raise SystemExit
 
     # if the content matched this expression verify that NIAs are used
     # consistently
@@ -328,13 +328,13 @@ def verifyRootDirectory (content):
         print ("nia1: {0}".format (nia1))
         print ("nia2: {0}".format (nia2))
         
-        print (" [1] Fatal error: NIAs are not used consistently")
+        print (" Fatal error: NIAs are not used consistently")
         print ("              verify the structure of your .zip file and make sure that all directories are")
         print ("              correctly named after the NIAs of each member of the team and that they are")
         print ("              the same used in the 'authors.txt' file")
         print ()
 
-        sys.exit (1)
+        raise SystemExit
 
     # finally, if no NIAs have been registered yet, do now
     if not Summary._nia1 and not Summary._nia2:
@@ -358,7 +358,7 @@ def getStudentInfo (content):
         print ()
         print ("INVALID ZIP FILE")
 
-        sys.exit (1)
+        raise SystemExit
 
     # otherwise, return the fields
     return (m.group ('nia'), m.group ('surname'), m.group ('name'))
@@ -391,7 +391,7 @@ def report (zipstream, regexp, content, matches):
     if ((nia1 != nia3 and nia1 != nia4) or
         (nia2 != nia3 and nia2 != nia4)):
         print (" Fatal error: mismatched NIAs in the report. Missed coincidence with the directory name")
-        sys.exit (1)
+        raise SystemExit
         
     # record the presence of the report
     Summary._report = os.path.basename (content)
@@ -435,7 +435,7 @@ def authors (zipstream, regexp, content, matches):
             print ("              the same used in the 'authors.txt' file")
             print ()
 
-            sys.exit (1)
+            raise SystemExit
 
         # if no NIAs have been registered yet, do now
         if not Summary._nia1 and not Summary._nia2:
@@ -556,7 +556,7 @@ def reportKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
-    sys.exit (1)
+    raise SystemExit
     
 # reports that the authors file has not been provided
 def authorsKO (component):
@@ -571,7 +571,7 @@ def authorsKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
-    sys.exit (1)
+    raise SystemExit
     
 # reports that the folder containing the first part has not been found
 def part1DirectoryKO (component):
@@ -664,7 +664,7 @@ def setUp ():
 
     # initialize the static data members of the Summary
     Summary._nia1 = 0
-    Summary._nia2 = 0
+    Summary._nia2 = None
 
     Summary._name1 = ""
     Summary._surname1 = ""
@@ -712,10 +712,8 @@ def onError (msg):
     """take an action in case of error such as bad zip file"""
 
     # print the message and immediately exit
-    print (msg)
-    print ()
-    print (" INVALID ZIP FILE!")
-    sys.exit (1)
+    print (" Fatal Error: {0}".format (msg))
+    raise SystemExit
 
 
 

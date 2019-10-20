@@ -58,7 +58,7 @@ class ZWCSchemaComponent:
         stream = """ configFile : {0}
  regexp     : {1}
  if_then    : {2}
- if_else  : {3}""".format (self._configFile.getNamespace (), self._regexp, self._if_then, self._if_else)
+ if_else    : {3}""".format (self._configFile.getNamespace (), self._regexp, self._if_then, self._if_else)
 
         return stream
 
@@ -144,13 +144,12 @@ class ZWCSchema:
            tuples using those definitions specified in the given configuration
            file ---given as an instance of ZWCConfigFile
 
+           The zipstream is expected to be an instance of zipfile.ZipFile but it
+           could be anything (even None). It is only used as a parameter given
+           to if-then functions
+
         """
 
-        # error checking - verify that the zipstream is an instance of a zipfile
-        if not isinstance (zipstream, zipfile.ZipFile):
-            print (" Fatal error: the zipstream is not an instance of zipfile")
-            sys.exit (1)
-        
         # error checking - verify that the given schema is a list
         if not isinstance (schema, list):
             print (" Fatal error: the schema '{0}' has not been given as a list".format (schema))
