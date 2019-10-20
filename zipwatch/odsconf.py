@@ -20,10 +20,6 @@ import sys                      # system accessing
 
 import pyexcel
 
-# globals
-# -----------------------------------------------------------------------------
-__version__  = '1.0'
-
 # CONTENTS
 # -----------------------------------------------------------------------------
 # This file contains the specification of a schema and other functions that are

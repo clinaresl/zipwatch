@@ -18,10 +18,6 @@ import os                       # file handling
 import re                       # matching regular expressions
 import sys                      # system accessing
 
-# globals
-# -----------------------------------------------------------------------------
-__version__  = '1.0'
-
 # CONTENTS
 # -----------------------------------------------------------------------------
 # This file contains the specification of a schema and other functions that are
@@ -713,7 +709,7 @@ def onError (msg):
 
     # print the message and immediately exit
     print (" Fatal Error: {0}".format (msg))
-    raise SystemExit
+    # raise SystemExit
 
 
 

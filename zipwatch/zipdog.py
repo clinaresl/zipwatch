@@ -12,20 +12,16 @@
 zip watcher examines and verifies the contents of zip files against a schema
 """
 
-# globals
-# -----------------------------------------------------------------------------
-__version__  = '1.0'
-
-
 # imports
 # -----------------------------------------------------------------------------
-import argparse                   # argument parsing
-import sys                        # system accessing
-import zipfile                    # zip files management
+import argparse                 # argument parsing
+import os                       # path filesystem
+import sys                      # system accessing
+import zipfile                  # zip files management
 
-import zwcconfig
-import zwcschema
-
+import zwcconfig                # configuration files
+import zwcschema                # configuration schemas and its components
+import zwcversion               # package version
 
 # functions
 # -----------------------------------------------------------------------------
@@ -65,7 +61,7 @@ def createArgParser ():
                        help="shows the schema the contents of zip files are compared with and exit")
     misc.add_argument ('-V', '--version',
                        action='version',
-                       version=" %s %s" % (sys.argv [0], __version__),
+                       version = "{0} {1} {2} ({3})".format (os.path.basename (sys.argv[0]), zwcversion.__version__, zwcversion.__author__, zwcversion.__email__),
                        help="output version information and exit")
 
     # and return the parser
