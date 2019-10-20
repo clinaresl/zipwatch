@@ -47,7 +47,8 @@ __version__  = '1.0'
 #                  to be shown
 #       onError: automatically invoked by zipwatch in case of error, e.g.,
 #                invalid zip file. It can be also invoked by services
-#                implemented in this module
+#                implemented in this module. It takes only one argument, an
+#                error message
 #
 # even if these fnctions are not necessary they should be implemented (with only
 # statement: 'pass')
@@ -776,10 +777,10 @@ def onSummary ():
     
 # onError
 # -----------------------------------------------------------------------------
-def onError ():
+def onError (msg):
     """take an action in case of error such as bad zip file"""
 
-    pass
+    pring msg
 
     
 

@@ -101,26 +101,32 @@ if __name__ == '__main__':
         print ("---------------------------------------------------------------")
 
         # list the contents of this file
-        with zipfile.ZipFile (ifile) as zipstream:
+        try: 
+            with zipfile.ZipFile (ifile) as zipstream:
 
-            # execute the pramble of the configuration file
-            configFile.setUp
-            
-            # create a schema from the specification given in the
-            # configuration file
-            schema = zwcschema.ZWCSchema (zipstream, configFile.getList ("schemaSpec"), configFile)
-    
-            # evaluate the contents of this zip file against the schema
-            schema.evaluate (zipstream.namelist ())
+                # execute the pramble of the configuration file
+                configFile.setUp
 
-            # execute also the tearDown
-            configFile.tearDown
-            
-            # if requested, show a summary with all the information extracted
-            # from the zip file
-            if (params.show_summary):
-                configFile.onSummary
-        
+                # create a schema from the specification given in the
+                # configuration file
+                schema = zwcschema.ZWCSchema (zipstream, configFile.getList ("schemaSpec"), configFile)
+
+                # evaluate the contents of this zip file against the schema
+                schema.evaluate (zipstream.namelist ())
+
+                # execute also the tearDown
+                configFile.tearDown
+
+                # if requested, show a summary with all the information extracted
+                # from the zip file
+                if (params.show_summary):
+                    configFile.onSummary
+
+        # in case of error, invoke 'onError' with the string generated in the
+        # exception
+        except:
+            configFile.onError (sys.exc_info()[1])
+
     # invoke the epilogue after the whole process
     configFile.epilogue
         

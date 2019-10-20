@@ -174,6 +174,19 @@ class ZWCConfigFile:
                 sys.exit (1)
     
 
+    def onError (self, message):
+        """automatically invoke the 'onError' service provided in the configuration file
+           of this instance
+
+        """
+        
+        command = """{0}.onError (message)""".format (self._namespace, message)
+        context = {
+            'message' : message
+        }
+        self.execute (command, context)
+
+                
     def execute (self, command, context=dict ()):
         """executes the given comman within the given context. It returns the resulting
                context
