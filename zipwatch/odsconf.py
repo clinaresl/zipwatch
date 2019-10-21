@@ -334,9 +334,9 @@ class ODSContents:
     def __add__ (self, other):
         """adds a new entry to this collection"""
 
-        # verify the new entry is given indeed as an instance of OSDContent
-        if not isinstance (other, OSDContent):
-            print (" Fatal error: ODSContents is a container of instances of OSDContent only!")
+        # verify the new entry is given indeed as an instance of ODSContent
+        if not isinstance (other, ODSContent):
+            print (" Fatal error: ODSContents is a container of instances of ODSContent only!")
         
         self._entries.append (other)
         return self
@@ -385,9 +385,9 @@ class ODSStatuses:
     def __add__ (self, other):
         """adds a new entry to this collection"""
 
-        # verify the new entry is given indeed as an instance of OSDStatus
-        if not isinstance (other, OSDStatus):
-            print (" Fatal error: ODSStatuses is a container of instances of OSDStatus only!")
+        # verify the new entry is given indeed as an instance of ODSStatus
+        if not isinstance (other, ODSStatus):
+            print (" Fatal error: ODSStatuses is a container of instances of ODSStatus only!")
         
         self._entries.append (other)
         return self
@@ -828,8 +828,8 @@ def tearDown (zipstream):
         odscontents = odscontents + odsline2
 
     # -- status
-    odsstatuses = ODSStatus ()
-    odsstatus = ODSStatus (None, "SUCCESSFUL")
+    odsstatuses = ODSStatuses ()
+    odsstatus = ODSStatus (zipstream.filename, "SUCCESSFUL")
     odsstatuses = odsstatuses + odsstatus
         
     
@@ -839,18 +839,30 @@ def epilogue ():
     """function invoked automatically after processing the contents of all zip files"""
 
     # create the contents of an ods file
-    contents = []
-
+    contents = [["NIA", "Apellidos", "Nombre", "Modelo.1", "Libreoffice", "Modelo.2", "MathProg", "Parte 3", "Extra", "Observaciones"]]
+    
     # for all entries processed so far
     for entry in ODSContents._entries:
 
         # add the information of this entry
         contents.append ([entry._nia, entry._surname, entry._name, entry._model, entry._libreoffice, entry._model, entry._mathprog, entry._model, entry._extra, "-"])
 
-    # create a sheet with these contents along with their column names
-    sheet = pyexcel.get_sheet (array=contents)
-    sheet.colnames = ["NIA", "Apellidos", "Nombre", "Modelo.1", "Libreoffice", "Modelo.2", "MathProg", "Parte 3", "Extra", "Observaciones"]
-    print (sheet)
+    # process now the status of all zip files
+    statuses = [["Filename", "Status"]]
+
+    # for all zip files processed so far
+    for entry in ODSStatuses._entries:
+
+        # add the status of this zip file 
+        statuses.append (entry.get ())
+
+    # save both sheets in the same spreadsheet
+    bookdict = {
+        'Status' : statuses,
+        'Entries': contents
+    }
+    book = pyexcel.get_book (bookdict = bookdict)
+    book.save_as ("report.ods")
 
 
 # onSummary
@@ -864,20 +876,29 @@ def onSummary (zipstream):
     
 # onError
 # -----------------------------------------------------------------------------
-def onError (msg):
+def onError (msg, zipfile):
     """take an action in case of error such as bad zip file"""
 
     # print the message
-    print (" Fatal Error in file {0}: {1}".format (os.path.basename (ifile), msg))
+    print (" Fatal Error in file {0}: {1}".format (os.path.basename (zipfile), msg))
 
+    # -- status
+    odsstatuses = ODSStatuses ()
+    odsstatus = ODSStatus (zipfile, "FATAL ERROR")
+    odsstatuses = odsstatuses + odsstatus
     
 # onAbort
 # -----------------------------------------------------------------------------
-def onAbort (ifile):
+def onAbort (zipfile):
     """take an action in case this configuration file halted execution"""
 
-    print (" Aborting file {0} ...".format (os.path.basename (ifile)))
+    print (" Aborting file {0} ...".format (os.path.basename (zipfile)))
 
+    # -- status
+    odsstatuses = ODSStatuses ()
+    odsstatus = ODSStatus (zipfile, "ABORTED")
+    odsstatuses = odsstatuses + odsstatus
+    
     
 
 # Local Variables:

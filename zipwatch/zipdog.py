@@ -98,6 +98,7 @@ if __name__ == '__main__':
     # for all files given in the command-line
     for ifile in params.files:
 
+        print ()
         print (" Processing '{0}' ...".format (ifile))
         print ("---------------------------------------------------------------")
 

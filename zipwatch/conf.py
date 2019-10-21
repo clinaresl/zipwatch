@@ -713,19 +713,19 @@ def onSummary (zipstream):
 
 # onError
 # -----------------------------------------------------------------------------
-def onError (msg, ifile):
+def onError (msg, zipfile):
     """take an action in case of error such as bad zip file"""
 
     # print the message
-    print (" Fatal Error in file {0}: {1}".format (os.path.basename (ifile), msg))
+    print (" Fatal Error in file {0}: {1}".format (os.path.basename (zipfile), msg))
 
     
 # onAbort
 # -----------------------------------------------------------------------------
-def onAbort (ifile):
+def onAbort (zipfile):
     """take an action in case this configuration file halted execution"""
 
-    print (" Aborting file {0} ...".format (os.path.basename (ifile)))
+    print (" Aborting file {0} ...".format (os.path.basename (zipfile)))
 
 
 
