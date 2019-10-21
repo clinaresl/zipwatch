@@ -52,7 +52,7 @@ pip install --upgrade SomeProject
 from a *configuration file*. This configuration file should provide
 the following data structure:
 
-* `schemaSpec`: it is a list of tuples, each one with three elements:
+* `contentSpec`: it is a list of tuples, each one with three elements:
 
   + *Regular expression*: if any entry of the zip file matches the
     given regexp, then the *if-then* function declared in this tuple
@@ -120,7 +120,7 @@ invoked by `zipwatch` in the following order:
 3. While processing a zip file, various *if-then* and *if-else*
    functions can be invoked according to whether the entries of the
    zip file match or not the entries specified in the *schema
-   specification* set up with `schemaSpec`.
+   specification* set up with `contentSpec`.
 4. Immediately after processing a zip file, `tearDown ()` is
    invoked. It is then invoked as many times as `setUp ()`.
 5. Once all zip files have been processed, `epilogue ()` is invoked

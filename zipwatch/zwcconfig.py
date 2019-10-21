@@ -126,7 +126,7 @@ class ZWCConfigFile:
            The following items are mandatory:
 
            * Lists:
-                schemaSpec - With the specification of all expected matches
+                contentSpec - With the specification of all expected matches
 
            * Functions:
                 preamble
@@ -141,16 +141,16 @@ class ZWCConfigFile:
 
         """
 
-        # check the existence of the list schemaSpec
-        if not self.checkList ("schemaSpec"):
-            print (" Fatal error: the component 'schemaSpec' has not been found in module '{0}'".format (self._config))
+        # check the existence of the list contentSpec
+        if not self.checkList ("contentSpec"):
+            print (" Fatal error: the component 'contentSpec' has not been found in module '{0}'".format (self._config))
             sys.exit (1)
 
         # verify that all functions given in the schema specification are also implemented
-        for ischema in self.getList ("schemaSpec"):
+        for ischema in self.getList ("contentSpec"):
 
             if len (ischema) != 3:
-                print (" Fatal error: the schema '{0}' from 'schemaSpec' has an incorrect number of arguments".format (ischema))
+                print (" Fatal error: the schema '{0}' from 'contentSpec' has an incorrect number of arguments".format (ischema))
                 sys.exit (1)
 
             # note that while the schema should consist of precisely three

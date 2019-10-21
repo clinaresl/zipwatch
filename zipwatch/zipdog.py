@@ -91,7 +91,7 @@ if __name__ == '__main__':
         # create a schema from the specification given in the configuration file
         # but attached to no zipstream ---as none has been opened and none
         # should be opened
-        schema = zwcschema.ZWCSchema (None, configFile.getList ("schemaSpec"), configFile)
+        schema = zwcschema.ZWCSchema (None, configFile.getList ("contentSpec"), configFile)
         print (schema)
         sys.exit (0)
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
                 # create a schema from the specification given in the
                 # configuration file
-                schema = zwcschema.ZWCSchema (zipstream, configFile.getList ("schemaSpec"), configFile)
+                schema = zwcschema.ZWCSchema (zipstream, configFile.getList ("contentSpec"), configFile)
 
                 # evaluate the contents of this zip file against the schema
                 schema.evaluate (zipstream.namelist ())

@@ -27,7 +27,7 @@ import sys                      # system accessing
 # A module to be usable by zipwatch should contain the following items with the
 # names given below:
 #
-# schemaSpec: schema definition
+# contentSpec: schema definition
 #
 # functions:
 #
@@ -152,7 +152,7 @@ import sys                      # system accessing
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
 # create the schema specification by hand
-schemaSpec = [
+contentSpec = [
         
     # report in pdf format
     ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$",
