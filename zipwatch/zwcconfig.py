@@ -14,6 +14,7 @@ Configuration files
 
 # imports
 # -----------------------------------------------------------------------------
+import inspect                  # introspective analysis of python modules
 import os                       # file handling
 import re                       # matching regular expressions
 import sys                      # system accessing
@@ -53,18 +54,25 @@ class ZWCConfigFile:
         else:
 
             # yeah, it exists, get then its namespace name
-            self._namespace = os.path.splitext (os.path.basename (configFile))[0]
-        
+            self._namespace = inspect.getmodulename (configFile)
 
     def __getattr__ (self, key):
-        """executes the function named by 'key' with no parameters in this configuration
-           file and returns the resulting context
+        """return the function named after key implemented in the configuration file. In
+           case it does not exist, an AttributeError exception is raised
 
         """
 
-        command = """{0}.{1} ()""".format (self._namespace, key)
-        return self.execute (command)
+        # check first whether key is defined as a function in the configuration file
+        if self.checkFunction (key):
 
+            # then return the function
+            command = """func = {0}.__dict__['{1}']""".format (self._namespace, key)
+            return self.execute (command) ['func']
+
+        # else raise an exception
+        else:
+            raise AttributeError
+        
 
     def getConfigFile (self):
         """return the configuration file used for defining this instance"""
@@ -174,19 +182,6 @@ class ZWCConfigFile:
                 sys.exit (1)
     
 
-    def onError (self, message):
-        """automatically invoke the 'onError' service provided in the configuration file
-           of this instance
-
-        """
-        
-        command = """{0}.onError (message)""".format (self._namespace, message)
-        context = {
-            'message' : message
-        }
-        self.execute (command, context)
-
-                
     def execute (self, command, context=dict ()):
         """executes the given comman within the given context. It returns the resulting
                context

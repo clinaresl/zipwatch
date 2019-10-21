@@ -43,9 +43,13 @@ import sys                      # system accessing
 #                invalid zip file. It can be also invoked by services
 #                implemented in this module. It takes only one argument, an
 #                error message
+#       onAbort: automatically invoked by zipwatch in case of an error reported
+#                by the configuration file, e.g., incorrect contents of a zip
+#                file
 #
 # even if these fnctions are not necessary they should be implemented (with only
-# statement: 'pass')
+# statement: 'pass'). All these functions (but preamble and epilogue) are
+# invoked with either the zipstream or the zip filename
 #
 # the schema specification might define other functions which should be of
 # course defined
@@ -128,6 +132,11 @@ import sys                      # system accessing
 # invoked automatically by zipwatch in case of error, e.g., bad zip file. It
 # could be also invoked by services implemented in this module
 
+# onAbort
+# -----------------------------------------------------------------------------
+# automatically invoked by zipwatch in case of an error reported by the
+# configuration file, e.g., incorrect contents of a zip file
+
 # tearDown
 # -----------------------------------------------------------------------------
 # this function is mandatory and should be provided in this module. It is
@@ -146,8 +155,8 @@ import sys                      # system accessing
 # -----------------------------------------------------------------------------
 # other than the contents depicted above, it is possible to provide here
 # additional functions/classes or functions/classes imported from other modules
-# that can be used in the evaluation of the if-then/if-else/onSummary/onError
-# functions that have to be provided
+# that can be used in the evaluation of the
+# if-then/if-else/onSummary/onError/onAbort functions that have to be provided
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -654,7 +663,7 @@ def preamble ():
 
 # setUp
 # -----------------------------------------------------------------------------
-def setUp ():
+def setUp (zipstream):
     """function invoked automatically before starting to process the contents of a
        zip file"""
 
@@ -682,7 +691,7 @@ def setUp ():
 
 # tearDown
 # -----------------------------------------------------------------------------
-def tearDown ():
+def tearDown (zipstream):
     """function invoked automatically after processing the contents of a zip file"""
 
     pass
@@ -696,7 +705,7 @@ def epilogue ():
 
 # onSummary
 # -----------------------------------------------------------------------------
-def onSummary ():
+def onSummary (zipstream):
     """shows a report summary of all info extracted from the zip file"""
 
     summary = Summary ()
@@ -704,12 +713,19 @@ def onSummary ():
 
 # onError
 # -----------------------------------------------------------------------------
-def onError (msg):
+def onError (msg, ifile):
     """take an action in case of error such as bad zip file"""
 
-    # print the message and immediately exit
-    print (" Fatal Error: {0}".format (msg))
-    # raise SystemExit
+    # print the message
+    print (" Fatal Error in file {0}: {1}".format (os.path.basename (ifile), msg))
+
+    
+# onAbort
+# -----------------------------------------------------------------------------
+def onAbort (ifile):
+    """take an action in case this configuration file halted execution"""
+
+    print (" Aborting file {0} ...".format (os.path.basename (ifile)))
 
 
 

@@ -82,7 +82,7 @@ if __name__ == '__main__':
     configFile.verify ()
 
     # invoke the preamble before starting the whole process
-    configFile.preamble
+    configFile.preamble ()
         
     # check whether show-schema has been requested
     if '--show-schema' in sys.argv or \
@@ -106,7 +106,7 @@ if __name__ == '__main__':
             with zipfile.ZipFile (ifile) as zipstream:
 
                 # execute the pramble of the configuration file
-                configFile.setUp
+                configFile.setUp (zipstream)
 
                 # create a schema from the specification given in the
                 # configuration file
@@ -116,25 +116,25 @@ if __name__ == '__main__':
                 schema.evaluate (zipstream.namelist ())
 
                 # execute also the tearDown
-                configFile.tearDown
+                configFile.tearDown (zipstream)
 
                 # if requested, show a summary with all the information extracted
                 # from the zip file
                 if (params.show_summary):
-                    configFile.onSummary
+                    configFile.onSummary (zipstream)
 
         # in case of SystemExit, there is nothing to do as that should usually
         # come from the configuration file aborting executing
         except SystemExit:
-            print (" Aborting ...")
+            configFile.onAbort (ifile)
     
         # in case of error, invoke 'onError' with the string generated in the
         # exception
         except:
-            configFile.onError (sys.exc_info()[1])
+            configFile.onError (sys.exc_info()[1], ifile)
 
     # invoke the epilogue after the whole process
-    configFile.epilogue
+    configFile.epilogue ()
         
 
                 

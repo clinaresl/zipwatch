@@ -45,9 +45,13 @@ import pyexcel
 #                invalid zip file. It can be also invoked by services
 #                implemented in this module. It takes only one argument, an
 #                error message
+#       onAbort: automatically invoked by zipwatch in case of an error reported
+#                by the configuration file, e.g., incorrect contents of a zip
+#                file
 #
 # even if these fnctions are not necessary they should be implemented (with only
-# statement: 'pass')
+# statement: 'pass'). All these functions (but preamble and epilogue) are
+# invoked with either the zipstream or the zip filename
 #
 # the schema specification might define other functions which should be of
 # course defined
@@ -129,6 +133,11 @@ import pyexcel
 # invoked automatically by zipwatch in case of error, e.g., bad zip file. It
 # could be also invoked by services implemented in this module
 
+# onAbort
+# -----------------------------------------------------------------------------
+# automatically invoked by zipwatch in case of an error reported by the
+# configuration file, e.g., incorrect contents of a zip file
+
 # tearDown
 # -----------------------------------------------------------------------------
 # this function is mandatory and should be provided in this module. It is
@@ -147,8 +156,8 @@ import pyexcel
 # -----------------------------------------------------------------------------
 # other than the contents depicted above, it is possible to provide here
 # additional functions/classes or functions/classes imported from other modules
-# that can be used in the evaluation of the if-then/if-else/onSummary/onError
-# functions that have to be provided
+# that can be used in the evaluation of the
+# if-then/if-else/onSummary/onError/onAbort functions that have to be provided
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -342,7 +351,58 @@ class ODSContents:
 
         return stream
 
+    
+# -----------------------------------------------------------------------------
+# ODSStatus
+#
+# Records the status of a single zip file
+# -----------------------------------------------------------------------------
+class ODSStatus:
+    """Records the status of a single zip file"""
 
+    def __init__ (self, zipfile, status):
+        """records the status of a single zip file"""
+
+        # record all attributes
+        (self._zipfile, self._status) = (zipfile, status)
+
+    def get (self):
+        """returns a list with the information of this instance"""
+
+        return [self._zipfile, self._status]
+        
+
+# -----------------------------------------------------------------------------
+# ODSStatuses
+#
+# Records the status of all zip files processed so far
+# -----------------------------------------------------------------------------
+class ODSStatuses:
+    """Records the status of all zip files processed so far"""
+
+    _entries = []
+
+    def __add__ (self, other):
+        """adds a new entry to this collection"""
+
+        # verify the new entry is given indeed as an instance of OSDStatus
+        if not isinstance (other, OSDStatus):
+            print (" Fatal error: ODSStatuses is a container of instances of OSDStatus only!")
+        
+        self._entries.append (other)
+        return self
+    
+    
+    def __str__ (self):
+        """provides a human readable version of the contents of this class"""
+
+        stream = ""
+        for entry in self._entries:
+            stream += "{0}".format (entry)
+
+        return stream
+
+    
 # Functions
 # -----------------------------------------------------------------------------
 
@@ -712,11 +772,12 @@ def preamble ():
        zipfile"""
 
     ODSContents._entries = []
+    ODSStatuses._entries = []
     
 
 # setUp
 # -----------------------------------------------------------------------------
-def setUp ():
+def setUp (zipstream):
     """function invoked automatically before starting to process the contents of a
        zip file"""
 
@@ -746,9 +807,10 @@ def setUp ():
 # -----------------------------------------------------------------------------
 
 # add a new entry to the contents to be shown on the ods file
-def tearDown ():
+def tearDown (zipstream):
     """add a new entry to the contents to be shown on the ods file"""
 
+    # --contents of the lab assignment
     odscontents = ODSContents ()
     
     # determine the entries of a new line in the spreadsheet
@@ -765,6 +827,11 @@ def tearDown ():
         odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, model, libreoffice, mathprog, dynamicprog)
         odscontents = odscontents + odsline2
 
+    # -- status
+    odsstatuses = ODSStatus ()
+    odsstatus = ODSStatus (None, "SUCCESSFUL")
+    odsstatuses = odsstatuses + odsstatus
+        
     
 # epilogue
 # -----------------------------------------------------------------------------
@@ -788,7 +855,7 @@ def epilogue ():
 
 # onSummary
 # -----------------------------------------------------------------------------
-def onSummary ():
+def onSummary (zipstream):
     """shows a report summary of all info extracted from the zip file"""
 
     summary = Summary ()
@@ -800,7 +867,16 @@ def onSummary ():
 def onError (msg):
     """take an action in case of error such as bad zip file"""
 
-    print (msg)
+    # print the message
+    print (" Fatal Error in file {0}: {1}".format (os.path.basename (ifile), msg))
+
+    
+# onAbort
+# -----------------------------------------------------------------------------
+def onAbort (ifile):
+    """take an action in case this configuration file halted execution"""
+
+    print (" Aborting file {0} ...".format (os.path.basename (ifile)))
 
     
 
