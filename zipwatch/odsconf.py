@@ -453,7 +453,7 @@ def getStudentInfo (content):
     """
 
     # parse the contents of this line
-    m = re.match ("\s*(?P<nia>\d{6})\s*(?P<surname>[^,]+),\s+(?P<name>.*)", content.decode ('ascii'))
+    m = re.match ("\s*(?P<nia>\d{6})\s*(?P<surname>[^,]+),\s+(?P<name>.*)", content.decode ('utf-8'))
 
     # in case the regular expression does not match
     if not m:
@@ -513,6 +513,9 @@ def authors (zipstream, regexp, content, matches):
         # retrieve the contents of the students ids
         ids = stream.readlines ()
 
+        # and now remove blank lines (those containing only spaces)
+        ids = [line for line in ids if line.strip ()]
+        
         # if there are not exactly two lines then immediately raise an error
         if not len (ids) or len (ids) > 2:
             print (" Fatal error: the file 'authors.txt' should contain the information of one or two students,")
