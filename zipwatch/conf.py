@@ -354,8 +354,9 @@ def getStudentInfo (content):
     """
 
     # parse the contents of this line
-    m = re.match ("\s*(?P<nia>\d{6})\s*(?P<surname>[^,]+),\s+(?P<name>.*)", content.decode ('utf-8'))
-
+    pattern = re.compile (r'\s*(?P<nia>\d{6})\s*(?P<surname>[^,]+),\s+(?P<name>[^\s]+)\s*', re.UNICODE)
+    m = re.match (pattern, content.decode ("utf-8", "ignore"))
+    
     # in case the regular expression does not match
     if not m:
 
