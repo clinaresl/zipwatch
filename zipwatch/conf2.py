@@ -24,35 +24,60 @@ import sys                      # system accessing
 # necessary to correctly interpret all components of the schema and also to
 # provide a summary of the information extracted from the zip file
 #
-# A module to be usable by zipwatch should contain the following items with the
-# names given below:
+# A module to be usable by zipwatch should contain all or some of the following
+# items with the names given below:
 #
 # contentSpec: schema definition
 #
 # functions:
 #
-#       preamble: to be invoked only once at the beginning of the session
-#       setUp: to be invoked before examining the contents of the next zip
-#              file. It is thus invoked once for each zip file
-#       tearDown: to be invoked after examining the contents of the last zip
-#                 file. It is thus invoked once for each zip file
-#       epilogue: to be invoked once as soon as the whole process is over
-#       onSummary: to be invoked once if and only if the user requests a summary
-#                  to be shown
-#       onError: automatically invoked by zipwatch in case of error, e.g.,
-#                invalid zip file. It can be also invoked by services
-#                implemented in this module. It takes only one argument, an
-#                error message
-#       onAbort: automatically invoked by zipwatch in case of an error reported
-#                by the configuration file, e.g., incorrect contents of a zip
-#                file
+#       preamble (optional): to be invoked only once at the beginning of the
+#                            session
+#       setUp (optional): to be invoked before examining the contents of the
+#                         next zip file. It is thus invoked once for each zip
+#                         file
+#       tearDown (optional): to be invoked after examining the contents of the
+#                            last zip file. It is thus invoked once for each zip
+#                            file
+#       epilogue (optional): to be invoked once as soon as the whole process is
+#       over
+#       onSummary (mandatory): to be invoked once if and only if the user
+#                              requests a summary to be shown
+#       onError (mandatory): automatically invoked by zipwatch in case of error,
+#                            e.g., invalid zip file. It can be also invoked by
+#                            services implemented in this module. It takes only
+#                            one argument, an error message
+#       onAbort (mandatory): automatically invoked by zipwatch in case of an
+#                            error reported by the configuration file, e.g.,
+#                            incorrect contents of a zip file
 #
-# even if these fnctions are not necessary they should be implemented (with only
-# statement: 'pass'). All these functions (but preamble and epilogue) are
-# invoked with either the zipstream or the zip filename
+# Whether these functions are mandatory or optional is given in the list
+# above.
+#
+# The following list provides a comprehensive view of the arguments
+# automatically used in the invocation of each function
+#
+#
+#                      | zipstream | zipfile | msg |
+#           -----------+-----------+---------+-----+
+#           preamble   |           |         |     |
+#           setup      |     x     |         |     |
+#           tearDown   |     x     |         |     |
+#           epilogue   |           |         |     |
+#           -----------+-----------+---------+-----+
+#           onSummary  |     x     |         |     |
+#           onError    |           |    x    |  x  |
+#           onAbort    |           |    x    |     |
+#           -----------+-----------+---------+-----+
+#
+# where
+#
+#    zipstream: is an instance of the zipstream.ZipStream been watched
+#    zipfile  : full path to the zipfile been watched as a string
+#    msg      : a descriptive message string
 #
 # the schema specification might define other functions which should be of
-# course defined
+# course defined, i.e., they are mandatory
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -67,12 +92,15 @@ import sys                      # system accessing
 #       given in first position.
 #
 #       These functions receive the following arguments:
-#          1. instance of a zipfile.ZipFile used to access the zip file
+#          1. Instance of the zipstream.ZipStream been watched
 #          2. Regular expression matched
 #          3. Specific content that matched the regular expression
 #          4. Number of matches of this component
 #
-#       if-then actions are mandatory
+#       If no action should be taken when the regular expression matches any of
+#       the contents of the zipfile, None can be given. Otherwise, the
+#       corresponding if-then function should be provided in the configuration
+#       file.
 #
 #    3. if-else action. It is a function provided in this file which should be
 #       invoked in case no file/directory in the zip file matched the given
@@ -81,12 +109,13 @@ import sys                      # system accessing
 #       These functions receive the following arguments:
 #          1. schema component missing
 #
-#       In case not matching a schema component is a fatal error, the
+#       In case no matching a specific schema component is a fatal error, the
 #       corresponding if-else function should exit automatically, i.e., it is
 #       not the responsibility of zipwatch to verify the severity of errors
 #
-#       if-else actions are optional. If none should be taken then just provide
-#       the empty string
+#       If no action should be taken in case of unmatch, None can be
+#       given. Otherwise, the corresponding if-else function should be provided
+#       in the configuration file.
 
 # IF-THEN ACTIONS
 # -----------------------------------------------------------------------------
@@ -109,16 +138,26 @@ import sys                      # system accessing
 
 # preamble
 # -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch only once before starting processing any zip
-# file. If nothing should be done then it should be provided with "pass"
+# this function is optional. If given, it is invoked automatically by zipwatch
+# only once before starting processing any zip file.
 
 # setUp
 # -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch before starting to process the contents of a
-# zipfile. It can be used to initialize structures. If nothing should be done
-# then it should be provided with "pass"
+# this function is optional. If given, it is invoked automatically by zipwatch
+# before starting to process the contents of a zipfile. It can be used to
+# initialize structures.
+
+# tearDown
+# -----------------------------------------------------------------------------
+# this function is optional. If given, it is invoked automatically by zipwatch
+# after processing the contents of a zipfile. It can be used to clean-up
+# structures or to start other processes with the information retrieved from the
+# zipfile.
+
+# epilogue
+# -----------------------------------------------------------------------------
+# this function is optional. If given, it is invoked automatically by zipwatch
+# only once after processing all zip files.
 
 # onSummary
 # -----------------------------------------------------------------------------
@@ -136,27 +175,6 @@ import sys                      # system accessing
 # -----------------------------------------------------------------------------
 # automatically invoked by zipwatch in case of an error reported by the
 # configuration file, e.g., incorrect contents of a zip file
-
-# tearDown
-# -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch after processing the contents of a
-# zipfile. It can be used to clean-up structures or to start other processes
-# with the information retrieved from the zipfile. If nothing should be done
-# then it should be provided with "pass"
-
-# epilogue
-# -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch only once after processing all zip files. If
-# nothing should be done then it should be provided with "pass"
-
-# others
-# -----------------------------------------------------------------------------
-# other than the contents depicted above, it is possible to provide here
-# additional functions/classes or functions/classes imported from other modules
-# that can be used in the evaluation of the
-# if-then/if-else/onSummary/onError/onAbort functions that have to be provided
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -195,17 +213,6 @@ contentSpec = [
      "part2File",
      "part2FileKO"),
     
-    # directory with the third part of the lab assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/$",
-     "part3Directory",
-     "part3DirectoryKO"),
-    
-    # directory with the solutions to the third part of the lab
-    # assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/.+$",
-     "part3File",
-     "part3FileKO"),
-
     # warn the user in case (s)he is submitting metadata
     ("(__MACOSX|\._Store)",
      "metadata",
@@ -247,9 +254,6 @@ class Summary:
     _part2Directory = False
     _part2Files = []
 
-    _part3Directory = False
-    _part3Files = []
-
     def __str__ (self):
         """provides a human readable version of the contents of this class"""
 
@@ -286,15 +290,6 @@ class Summary:
                 stream += "\t\t{0}\n".format (ifile)
         stream += "\n"
     
-        folder = "Yes" if Summary._part3Directory else "No"
-        stream += " * Third part of the lab assignment:\n"
-        stream += " \tFolder present: {0}\n".format (folder)
-        if Summary._part3Files:
-            stream += "\tFiles:\n"
-            for ifile in Summary._part3Files:
-                stream += "\t\t{0}\n".format (ifile)
-        stream += "\n"
-
         return stream
     
 
@@ -382,7 +377,7 @@ def getStudentInfo (content):
 #    4. Number of matches of this component
 #
 # note that all contents certainly match the regexp
-
+#
 # acknowledges the presence of the report
 def report (zipstream, regexp, content, matches):
     """acknowledges the presence of the report"""
@@ -509,29 +504,6 @@ def part2File (zipstream, regexp, content, matches):
     # assignment
     Summary._part2Files.append (os.path.basename (content))
 
-# acknowledges the presence of the folder containing the third part
-def part3Directory (zipstream, regexp, content, matches):
-    """acknowledges the presence of the folder containing the third part"""
-
-    # verify the root directory
-    verifyRootDirectory (content)
-    
-    # record the presence of the directory with the third part of the
-    # lab assignment
-    Summary._part3Directory = True
-
-# acknowledges the presence of a file in the folder containing the third part
-def part3File (zipstream, regexp, content, matches):
-    """acknowledges the presence of a file in the folder containing the third part"""
-
-    # verify the root directory
-    verifyRootDirectory (content)
-    
-    # record the existence of this file in the third part of the lab
-    # assignment
-    Summary._part3Files.append (os.path.basename (content))
-
-    
 # warn the user in case (s)he is submitting metadat
 def metadata (zipstream, regexp, content, matches):
     """warn the user in case (s)he is submitting metadata"""
@@ -631,40 +603,11 @@ def part2FileKO (component):
         print ("          this does not invalidate your .zip file but be warned that your second part will score 0")
         print ()
 
-# reports that the folder containing the third part has not been found
-def part3DirectoryKO (component):
-    """reports that the folder containing the second part has not been found.
-
-       This is not a fatal error, but the user should be warned much the same"""
-
-    print (" Warning: the folder with the third part 'parte-3/' has not been found")
-    print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
-    print ("          the extra point granted for doing this part of the lab assignment")
-    print ()
-
-# reports that the folder containing the third part contains no files
-def part3FileKO (component):
-    """reports that the folder containing the third part contains no files.
-
-       This is not a fatal error, but the user should be warned much the same"""
-
-    # show the message only in case the directory was found, otherwise, it is
-    # obvious there are no files within an unexistent directory! ;)
-    if (Summary._part3Directory):
-    
-        print (" Warning: the folder with the third part 'parte-3/' contains no files")
-        print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
-        print ("          the extra point granted for doing this part of the lab assignment")
-        print ()
-    
 
 # preamble
 # -----------------------------------------------------------------------------
-def preamble ():
-    """function invoked automatically before starting to process the contents of any
-       zipfile"""
 
-    pass
+# None
 
 # setUp
 # -----------------------------------------------------------------------------
@@ -690,23 +633,15 @@ def setUp (zipstream):
     Summary._part2Directory = False
     Summary._part2Files = []
 
-    Summary._part3Directory = False
-    Summary._part3Files = []
-    
-
 # tearDown
 # -----------------------------------------------------------------------------
-def tearDown (zipstream):
-    """function invoked automatically after processing the contents of a zip file"""
 
-    pass
+# None
 
 # epilogue
 # -----------------------------------------------------------------------------
-def epilogue ():
-    """function invoked automatically after processing the contents of all zip files"""
 
-    pass
+# None
 
 # onSummary
 # -----------------------------------------------------------------------------

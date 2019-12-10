@@ -69,9 +69,9 @@ class ZWCConfigFile:
             command = """func = {0}.__dict__['{1}']""".format (self._namespace, key)
             return self.execute (command) ['func']
 
-        # else raise an exception
+        # else invoke the identity function
         else:
-            raise AttributeError
+            return self.id
         
 
     def getConfigFile (self):
@@ -97,7 +97,17 @@ class ZWCConfigFile:
         command = """lstHandler = {0}.{1}""".format (self._namespace, component)
         return self.execute (command) ["lstHandler"]
 
+
+    def id (self, *kwargs):
+        """identity function that does nothing. It is provided here as a substitution
+           for those functions in the configuration file which have not been
+           defined
+
+        """
+
+        pass
     
+        
     def checkList (self, component):
         """verifies that the given component is defined in this configuration file as a list"""
 
@@ -137,11 +147,8 @@ class ZWCConfigFile:
                 contentSpec - With the specification of all expected matches
 
            * Functions:
-                preamble
-                setup
-                tearDown
-                epilogue
                 onSummary
+                onAbort
                 onError
 
                 In addition, all if-then and if-else functions registered in the
@@ -175,7 +182,7 @@ class ZWCConfigFile:
                 sys.exit (1)
 
         # check the existence of the mandatory functions
-        for icomponent in ["preamble", "setUp", "tearDown", "epilogue", "onSummary", "onError"]:
+        for icomponent in ["onSummary", "onError", "onAbort"]:
 
             if not self.checkFunction (icomponent):
                 print (" Fatal error: the component '{0}' has not been found in module '{1}'".format (icomponent, self._config))

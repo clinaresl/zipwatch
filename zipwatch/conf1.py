@@ -9,7 +9,7 @@
 #
 
 """
-Configuration file for lab assignment #1 (professor version) - Heuristics and Optimization
+Configuration file for lab assignment #1 (student version) - Heuristics and Optimization
 """
 
 # imports
@@ -18,43 +18,66 @@ import os                       # file handling
 import re                       # matching regular expressions
 import sys                      # system accessing
 
-import pyexcel
-
 # CONTENTS
 # -----------------------------------------------------------------------------
 # This file contains the specification of a schema and other functions that are
 # necessary to correctly interpret all components of the schema and also to
 # provide a summary of the information extracted from the zip file
 #
-# A module to be usable by zipwatch should contain the following items with the
-# names given below:
+# A module to be usable by zipwatch should contain all or some of the following
+# items with the names given below:
 #
 # contentSpec: schema definition
 #
 # functions:
 #
-#       preamble: to be invoked only once at the beginning of the session
-#       setUp: to be invoked before examining the contents of the next zip
-#              file. It is thus invoked once for each zip file
-#       tearDown: to be invoked after examining the contents of the last zip
-#                 file. It is thus invoked once for each zip file
-#       epilogue: to be invoked once as soon as the whole process is over
-#       onSummary: to be invoked once if and only if the user requests a summary
-#                  to be shown
-#       onError: automatically invoked by zipwatch in case of error, e.g.,
-#                invalid zip file. It can be also invoked by services
-#                implemented in this module. It takes only one argument, an
-#                error message
-#       onAbort: automatically invoked by zipwatch in case of an error reported
-#                by the configuration file, e.g., incorrect contents of a zip
-#                file
+#       preamble (optional): to be invoked only once at the beginning of the
+#                            session
+#       setUp (optional): to be invoked before examining the contents of the
+#                         next zip file. It is thus invoked once for each zip
+#                         file
+#       tearDown (optional): to be invoked after examining the contents of the
+#                            last zip file. It is thus invoked once for each zip
+#                            file
+#       epilogue (optional): to be invoked once as soon as the whole process is
+#       over
+#       onSummary (mandatory): to be invoked once if and only if the user
+#                              requests a summary to be shown
+#       onError (mandatory): automatically invoked by zipwatch in case of error,
+#                            e.g., invalid zip file. It can be also invoked by
+#                            services implemented in this module. It takes only
+#                            one argument, an error message
+#       onAbort (mandatory): automatically invoked by zipwatch in case of an
+#                            error reported by the configuration file, e.g.,
+#                            incorrect contents of a zip file
 #
-# even if these fnctions are not necessary they should be implemented (with only
-# statement: 'pass'). All these functions (but preamble and epilogue) are
-# invoked with either the zipstream or the zip filename
+# Whether these functions are mandatory or optional is given in the list
+# above.
+#
+# The following list provides a comprehensive view of the arguments
+# automatically used in the invocation of each function
+#
+#
+#                      | zipstream | zipfile | msg |
+#           -----------+-----------+---------+-----+
+#           preamble   |           |         |     |
+#           setup      |     x     |         |     |
+#           tearDown   |     x     |         |     |
+#           epilogue   |           |         |     |
+#           -----------+-----------+---------+-----+
+#           onSummary  |     x     |         |     |
+#           onError    |           |    x    |  x  |
+#           onAbort    |           |    x    |     |
+#           -----------+-----------+---------+-----+
+#
+# where
+#
+#    zipstream: is an instance of the zipstream.ZipStream been watched
+#    zipfile  : full path to the zipfile been watched as a string
+#    msg      : a descriptive message string
 #
 # the schema specification might define other functions which should be of
-# course defined
+# course defined, i.e., they are mandatory
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -69,11 +92,15 @@ import pyexcel
 #       given in first position.
 #
 #       These functions receive the following arguments:
-#          1. Regular expression matched
-#          2. Specific content that matched the regular expression
-#          3. Number of matches of this component
+#          1. Instance of the zipstream.ZipStream been watched
+#          2. Regular expression matched
+#          3. Specific content that matched the regular expression
+#          4. Number of matches of this component
 #
-#       if-then actions are mandatory
+#       If no action should be taken when the regular expression matches any of
+#       the contents of the zipfile, None can be given. Otherwise, the
+#       corresponding if-then function should be provided in the configuration
+#       file.
 #
 #    3. if-else action. It is a function provided in this file which should be
 #       invoked in case no file/directory in the zip file matched the given
@@ -82,12 +109,13 @@ import pyexcel
 #       These functions receive the following arguments:
 #          1. schema component missing
 #
-#       In case not matching a schema component is a fatal error, the
+#       In case no matching a specific schema component is a fatal error, the
 #       corresponding if-else function should exit automatically, i.e., it is
 #       not the responsibility of zipwatch to verify the severity of errors
 #
-#       if-else actions are optional. If none should be taken then just provide
-#       the empty string
+#       If no action should be taken in case of unmatch, None can be
+#       given. Otherwise, the corresponding if-else function should be provided
+#       in the configuration file.
 
 # IF-THEN ACTIONS
 # -----------------------------------------------------------------------------
@@ -110,16 +138,26 @@ import pyexcel
 
 # preamble
 # -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch only once before starting processing any zip
-# file. If nothing should be done then it should be provided with "pass"
+# this function is optional. If given, it is invoked automatically by zipwatch
+# only once before starting processing any zip file.
 
 # setUp
 # -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch before starting to process the contents of a
-# zipfile. It can be used to initialize structures. If nothing should be done
-# then it should be provided with "pass"
+# this function is optional. If given, it is invoked automatically by zipwatch
+# before starting to process the contents of a zipfile. It can be used to
+# initialize structures.
+
+# tearDown
+# -----------------------------------------------------------------------------
+# this function is optional. If given, it is invoked automatically by zipwatch
+# after processing the contents of a zipfile. It can be used to clean-up
+# structures or to start other processes with the information retrieved from the
+# zipfile.
+
+# epilogue
+# -----------------------------------------------------------------------------
+# this function is optional. If given, it is invoked automatically by zipwatch
+# only once after processing all zip files.
 
 # onSummary
 # -----------------------------------------------------------------------------
@@ -137,27 +175,6 @@ import pyexcel
 # -----------------------------------------------------------------------------
 # automatically invoked by zipwatch in case of an error reported by the
 # configuration file, e.g., incorrect contents of a zip file
-
-# tearDown
-# -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch after processing the contents of a
-# zipfile. It can be used to clean-up structures or to start other processes
-# with the information retrieved from the zipfile. If nothing should be done
-# then it should be provided with "pass"
-
-# epilogue
-# -----------------------------------------------------------------------------
-# this function is mandatory and should be provided in this module. It is
-# invoked automatically by zipwatch only once after processing all zip files. If
-# nothing should be done then it should be provided with "pass"
-
-# others
-# -----------------------------------------------------------------------------
-# other than the contents depicted above, it is possible to provide here
-# additional functions/classes or functions/classes imported from other modules
-# that can be used in the evaluation of the
-# if-then/if-else/onSummary/onError/onAbort functions that have to be provided
 
 # SCHEMA DEFINITION:
 # -----------------------------------------------------------------------------
@@ -213,6 +230,7 @@ contentSpec = [
      None)
     
 ]
+
 
 # Classes
 # -----------------------------------------------------------------------------
@@ -296,113 +314,8 @@ class Summary:
         stream += "\n"
 
         return stream
-
-
-# -----------------------------------------------------------------------------
-# ODSContent
-#
-# Records all the information to be shown on a single line of the spreadsheet
-# -----------------------------------------------------------------------------
-class ODSContent:
-    """Records all the information to be shown on a single line of the
-       spreadsheet"""
-
-    def __init__ (self, nia, surname, name, model, libreoffice, mathprog, extra):
-        """records the information to be shown for a single student with information
-           extracted from the zip file"""
-
-        # record all attributes
-        (self._nia, self._surname, self._name, self._model, self._libreoffice, self._mathprog, self._extra) = \
-            (nia, surname, name, model, libreoffice, mathprog, extra)
-
-    def get (self):
-        """returns a list with the information of this instance"""
-
-        return [self._nia, self._surname, self._name, self._model, self._libreoffice, self._model, self._mathprog, self._extra]
-        
-
-# -----------------------------------------------------------------------------
-# ODSContents
-#
-# Records all the information to be shown on the ods sheet
-# -----------------------------------------------------------------------------
-class ODSContents:
-    """Records all the information to be shown on the ods sheet"""
-
-    _entries = []
-
-    def __add__ (self, other):
-        """adds a new entry to this collection"""
-
-        # verify the new entry is given indeed as an instance of ODSContent
-        if not isinstance (other, ODSContent):
-            print (" Fatal error: ODSContents is a container of instances of ODSContent only!")
-        
-        self._entries.append (other)
-        return self
     
-    
-    def __str__ (self):
-        """provides a human readable version of the contents of this class"""
 
-        stream = ""
-        for entry in self._entries:
-            stream += "{0}".format (entry)
-
-        return stream
-
-    
-# -----------------------------------------------------------------------------
-# ODSStatus
-#
-# Records the status of a single zip file
-# -----------------------------------------------------------------------------
-class ODSStatus:
-    """Records the status of a single zip file"""
-
-    def __init__ (self, zipfile, status):
-        """records the status of a single zip file"""
-
-        # record all attributes
-        (self._zipfile, self._status) = (zipfile, status)
-
-    def get (self):
-        """returns a list with the information of this instance"""
-
-        return [self._zipfile, self._status]
-        
-
-# -----------------------------------------------------------------------------
-# ODSStatuses
-#
-# Records the status of all zip files processed so far
-# -----------------------------------------------------------------------------
-class ODSStatuses:
-    """Records the status of all zip files processed so far"""
-
-    _entries = []
-
-    def __add__ (self, other):
-        """adds a new entry to this collection"""
-
-        # verify the new entry is given indeed as an instance of ODSStatus
-        if not isinstance (other, ODSStatus):
-            print (" Fatal error: ODSStatuses is a container of instances of ODSStatus only!")
-        
-        self._entries.append (other)
-        return self
-    
-    
-    def __str__ (self):
-        """provides a human readable version of the contents of this class"""
-
-        stream = ""
-        for entry in self._entries:
-            stream += "{0}".format (entry)
-
-        return stream
-
-    
 # Functions
 # -----------------------------------------------------------------------------
 
@@ -428,10 +341,16 @@ def verifyRootDirectory (content):
 
     # if the content matched this expression verify that NIAs are used
     # consistently
+
     (nia1, nia2) = (m.group ('nia1'), m.group ('nia2'))
     if (Summary._nia1 or Summary._nia2) and \
        ( (Summary._nia1 != nia1 and Summary._nia1 != nia2) or
          (Summary._nia2 != nia1 and Summary._nia2 != nia2) ):
+
+        print (Summary ())
+        print ("nia1: {0}".format (nia1))
+        print ("nia2: {0}".format (nia2))
+        
         print (" Fatal error: NIAs are not used consistently")
         print ("              verify the structure of your .zip file and make sure that all directories are")
         print ("              correctly named after the NIAs of each member of the team and that they are")
@@ -455,14 +374,15 @@ def getStudentInfo (content):
     # parse the contents of this line
     pattern = re.compile (r'\s*(?P<nia>\d{6})\s*(?P<surname>[^,]+),\s+(?P<name>[^\s]+)\s*', re.UNICODE)
     m = re.match (pattern, content.decode ("utf-8", "ignore"))
-
+    
     # in case the regular expression does not match
     if not m:
+
         print (" Fatal error: it is not possible to extract the students info from the following line")
         print ("              {0}".format (content))
         print ()
         print ("INVALID ZIP FILE")
-
+        
         raise SystemExit
 
     # otherwise, return the fields
@@ -480,7 +400,7 @@ def getStudentInfo (content):
 #    4. Number of matches of this component
 #
 # note that all contents certainly match the regexp
-
+#
 # acknowledges the presence of the report
 def report (zipstream, regexp, content, matches):
     """acknowledges the presence of the report"""
@@ -530,7 +450,7 @@ def authors (zipstream, regexp, content, matches):
         if len (ids) > 1:
             (nia2, surname2, name2) = getStudentInfo (ids[1])
         else:
-            (nia2, surname2, name2) = (None, "", "")
+            (nia2, surname2, name2) = (None, "", "")            
 
         # if the content matched this expression verify that NIAs are used
         # consistently
@@ -664,7 +584,7 @@ def reportKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
-    Summary._report = None
+    raise SystemExit
     
 # reports that the authors file has not been provided
 def authorsKO (component):
@@ -679,8 +599,6 @@ def authorsKO (component):
     print ()
     print (" INVALID ZIP FILE!")
 
-    # this is considered a system error because there is no one to attribute the
-    # error so that execution should immediately halt
     raise SystemExit
     
 # reports that the folder containing the first part has not been found
@@ -692,8 +610,6 @@ def part1DirectoryKO (component):
     print (" Warning: the folder with the first part 'parte-1/' has not been found")
     print ("          this does not invalidate your .zip file but be warned that your first part will score 0")
     print ()
-
-    Summary._part1Directory = False
 
 # reports that the folder containing the first part contains no files
 def part1FileKO (component):
@@ -709,8 +625,6 @@ def part1FileKO (component):
         print ("          this does not invalidate your .zip file but be warned that your first part will score 0")
         print ()
 
-    Summary._part1Files = []
-    
 # reports that the folder containing the second part has not been found
 def part2DirectoryKO (component):
     """reports that the folder containing the second part has not been found.
@@ -720,8 +634,6 @@ def part2DirectoryKO (component):
     print (" Warning: the folder with the second part 'parte-2/' has not been found")
     print ("          this does not invalidate your .zip file but be warned that your second part will score 0")
     print ()
-
-    Summary._part2Directory = False
 
 # reports that the folder containing the second part contains no files
 def part2FileKO (component):
@@ -737,8 +649,6 @@ def part2FileKO (component):
         print ("          this does not invalidate your .zip file but be warned that your second part will score 0")
         print ()
 
-    Summary._part2Files = []
-    
 # reports that the folder containing the third part has not been found
 def part3DirectoryKO (component):
     """reports that the folder containing the second part has not been found.
@@ -750,8 +660,6 @@ def part3DirectoryKO (component):
     print ("          the extra point granted for doing this part of the lab assignment")
     print ()
 
-    Summary._part3Directory = False
-    
 # reports that the folder containing the third part contains no files
 def part3FileKO (component):
     """reports that the folder containing the third part contains no files.
@@ -767,17 +675,11 @@ def part3FileKO (component):
         print ("          the extra point granted for doing this part of the lab assignment")
         print ()
     
-    Summary._part3Files = []
 
 # preamble
 # -----------------------------------------------------------------------------
-def preamble ():
-    """function invoked automatically before starting to process the contents of any
-       zipfile"""
 
-    ODSContents._entries = []
-    ODSStatuses._entries = []
-    
+# None
 
 # setUp
 # -----------------------------------------------------------------------------
@@ -810,64 +712,12 @@ def setUp (zipstream):
 # tearDown
 # -----------------------------------------------------------------------------
 
-# add a new entry to the contents to be shown on the ods file
-def tearDown (zipstream):
-    """add a new entry to the contents to be shown on the ods file"""
+# None
 
-    # --contents of the lab assignment
-    odscontents = ODSContents ()
-    
-    # determine the entries of a new line in the spreadsheet
-    model       = "" if Summary._report else "0"
-    libreoffice = "" if Summary._part1Files else "0"
-    mathprog    = "" if Summary._part2Files else "0"
-    dynamicprog = "1" if Summary._part3Files else "0"
-    
-    odsline1 = ODSContent (Summary._nia1, Summary._surname1, Summary._name1, model, libreoffice, mathprog, dynamicprog)
-    odscontents = odscontents + odsline1
-
-    # if and only if two members are in this group then create an entry for both
-    if Summary._nia2:
-        odsline2 = ODSContent (Summary._nia2, Summary._surname2, Summary._name2, model, libreoffice, mathprog, dynamicprog)
-        odscontents = odscontents + odsline2
-
-    # -- status
-    odsstatuses = ODSStatuses ()
-    odsstatus = ODSStatus (zipstream.filename, "SUCCESSFUL")
-    odsstatuses = odsstatuses + odsstatus
-        
-    
 # epilogue
 # -----------------------------------------------------------------------------
-def epilogue ():
-    """function invoked automatically after processing the contents of all zip files"""
 
-    # create the contents of an ods file
-    contents = [["NIA", "Apellidos", "Nombre", "Modelo.1", "Libreoffice", "Modelo.2", "MathProg", "Parte 3", "Extra", "Observaciones"]]
-    
-    # for all entries processed so far
-    for entry in ODSContents._entries:
-
-        # add the information of this entry
-        contents.append ([entry._nia, entry._surname, entry._name, entry._model, entry._libreoffice, entry._model, entry._mathprog, entry._model, entry._extra, "-"])
-
-    # process now the status of all zip files
-    statuses = [["Filename", "Status"]]
-
-    # for all zip files processed so far
-    for entry in ODSStatuses._entries:
-
-        # add the status of this zip file 
-        statuses.append (entry.get ())
-
-    # save both sheets in the same spreadsheet
-    bookdict = {
-        'Status' : statuses,
-        'Entries': contents
-    }
-    book = pyexcel.get_book (bookdict = bookdict)
-    book.save_as ("report.ods")
-
+# None
 
 # onSummary
 # -----------------------------------------------------------------------------
@@ -877,7 +727,6 @@ def onSummary (zipstream):
     summary = Summary ()
     print (summary)
 
-    
 # onError
 # -----------------------------------------------------------------------------
 def onError (msg, zipfile):
@@ -886,10 +735,6 @@ def onError (msg, zipfile):
     # print the message
     print (" Fatal Error in file {0}: {1}".format (os.path.basename (zipfile), msg))
 
-    # -- status
-    odsstatuses = ODSStatuses ()
-    odsstatus = ODSStatus (zipfile, "FATAL ERROR")
-    odsstatuses = odsstatuses + odsstatus
     
 # onAbort
 # -----------------------------------------------------------------------------
@@ -898,12 +743,8 @@ def onAbort (zipfile):
 
     print (" Aborting file {0} ...".format (os.path.basename (zipfile)))
 
-    # -- status
-    odsstatuses = ODSStatuses ()
-    odsstatus = ODSStatus (zipfile, "ABORTED")
-    odsstatuses = odsstatuses + odsstatus
-    
-    
+
+
 
 # Local Variables:
 # mode:python
