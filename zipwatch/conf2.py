@@ -182,34 +182,34 @@ import sys                      # system accessing
 contentSpec = [
         
     # report in pdf format
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$",
      "report",
      "reportKO"),
     
     # authors 
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$",
      "authors",
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$",
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$",
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$",
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$",
+    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$",
      "part2File",
      "part2FileKO"),
     
@@ -302,7 +302,7 @@ def verifyRootDirectory (content):
 
     # match the contents of this content against a regular expression of the
     # root directory
-    rootregexp = "^p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/"
+    rootregexp = "^p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/"
     m = re.match (rootregexp, content)
     if not m:
         print (" Fatal error: the root directory has not been found")
@@ -310,7 +310,7 @@ def verifyRootDirectory (content):
         print ("              the regular expression given below")
         print ()
         print (" Regular expression: '{0}'".format (rootregexp))
-        print (" Examples          : p1-743902/, p1-346089-330696/")
+        print (" Examples          : p2-743902/, p2-346089-330696/")
         print ()
         print (" INVALID ZIP FILE!")
 
@@ -514,7 +514,7 @@ def metadata (zipstream, regexp, content, matches):
     print ("          additional arguments to your zip command:")
     print ('                                -x ".*" -x "__MACOSX"')
     print ()
-    print (' Example: zip -r ~/p1-346089-330696.zip . -x ".*" -x "__MACOSX"')
+    print (' Example: zip -r ~/p2-346089-330696.zip . -x ".*" -x "__MACOSX"')
     
 # IF-ELSE ACTIONS
 # -----------------------------------------------------------------------------
@@ -534,7 +534,7 @@ def reportKO (component):
     print ("              adhere to the regular expression given below")
     print ()
     print (" Regular expression: {0}".format (component.getRegexp ()))
-    print (" Example           : p1-346089-330696/346089-330696.pdf")
+    print (" Example           : p2-346089-330696/346089-330696.pdf")
     print ()
     print (" INVALID ZIP FILE!")
 
@@ -549,7 +549,7 @@ def authorsKO (component):
     print ("              to the regular expression given below")
     print ()
     print (" Regular expression: {0}".format (component.getRegexp ()))
-    print (" Example           : p1-346089-330696/autores.txt")
+    print (" Example           : p2-346089-330696/autores.txt")
     print ()
     print (" INVALID ZIP FILE!")
 
