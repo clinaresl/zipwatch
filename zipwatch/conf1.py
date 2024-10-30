@@ -214,15 +214,15 @@ contentSpec = [
      "part2FileKO"),
     
     # directory with the third part of the lab assignment
-    # ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/$",
-    #  "part3Directory",
-    #  "part3DirectoryKO"),
+    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/$",
+     "part3Directory",
+     "part3DirectoryKO"),
 
-    # # directory with the solutions to the third part of the lab
-    # # assignment
-    # ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/.+$",
-    #  "part3File",
-    #  "part3FileKO"),
+    # directory with the solutions to the third part of the lab
+    # assignment
+    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/.+$",
+     "part3File",
+     "part3FileKO"),
 
     # warn the user in case (s)he is submitting metadata
     ("(__MACOSX|\._Store)",
