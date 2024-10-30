@@ -114,7 +114,7 @@ the following functions:
 * `onAbort (zipfile)`: to be invoked automatically by `zipwatch` if
   the configuration file raised a `SystemExit` exception ---either
   explicitly with `raise SystemExit` or implicitly with `sys.exit ()`
-* ``onError (msg, zipfile)`: to be invoked automatically by `zipwatch`
+* `onError (msg, zipfile)`: to be invoked automatically by `zipwatch`
   in case of a fatal error such as a zip file not found or a corrupt
   zip file.
   
