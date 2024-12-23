@@ -227,7 +227,7 @@ contentSpec = [
     #  "part3FileKO"),
 
     # warn the user in case (s)he is submitting metadata
-    ("(__MACOSX|\._Store)",
+    (r'(__MACOSX|\._Store)',
      "metadata",
      None)
     
@@ -480,7 +480,7 @@ def verifyRootDirectory (content):
 
     # match the contents of this content against a regular expression of the
     # root directory
-    rootregexp = "^p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/"
+    rootregexp = r'^p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/'
     m = re.match (rootregexp, content)
     if not m:
         print (" Fatal error: the root directory has not been found")
