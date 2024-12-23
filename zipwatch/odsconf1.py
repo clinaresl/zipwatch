@@ -184,34 +184,34 @@ import pyexcel
 contentSpec = [
         
     # report in pdf format
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$',
      "report",
      "reportKO"),
     
     # authors 
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$',
      "authors",
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$',
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$',
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$',
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$",
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$',
      "part2File",
      "part2FileKO"),
     
