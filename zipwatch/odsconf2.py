@@ -184,39 +184,39 @@ import pyexcel
 contentSpec = [
         
     # report in pdf format
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/(?P<nia3>\d{6})(-(?P<nia4>\d{6}))?\.pdf$',
      "report",
      "reportKO"),
     
     # authors 
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/autores\.txt$',
      "authors",
      "authorsKO"),
     
     # directory of the first part of the lab assignment
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/$',
      "part1Directory",
      "part1DirectoryKO"),
     
     # directory with the solutions to the first part of the lab
     # assignment
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-1/.+$',
      "part1File",
      "part1FileKO"),
     
     # directory with the second part of the lab assignment
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/$',
      "part2Directory",
      "part2DirectoryKO"),
     
     # directory with the solutions to the second part of the lab
     # assignment
-    ("p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$",
+    (r'p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-2/.+$',
      "part2File",
      "part2FileKO"),
     
     # warn the user in case (s)he is submitting metadata
-    ("(__MACOSX|\._Store)",
+    (r'(__MACOSX|\._Store)',
      "metadata",
      None)
     
@@ -457,7 +457,7 @@ def verifyRootDirectory (content):
 
     # match the contents of this content against a regular expression of the
     # root directory
-    rootregexp = "^p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/"
+    rootregexp = r'^p2-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/'
     m = re.match (rootregexp, content)
     if not m:
         print (" Fatal error: the root directory has not been found")
@@ -567,7 +567,7 @@ def authors (zipstream, regexp, content, matches):
             print (" Fatal error: the file 'authors.txt' should contain the information of one or two students,")
             print ("              one per line, following the regexp shown below")
             print ()
-            print (" Regexp: \s*(?P<nia1>\d{6})\s*(?P<surname1>[^,]+),\s+(?P<name1>.*)")
+            print (r' Regexp: \s*(?P<nia1>\d{6})\s*(?P<surname1>[^,]+),\s+(?P<name1>.*)')
             print (" Example: 671342 Turing, Alan")
 
         # retrieve information from that line
