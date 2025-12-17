@@ -214,7 +214,7 @@ contentSpec = [
      "part2FileKO"),
     
     # warn the user in case (s)he is submitting metadata
-    (r'(__MACOSX|\._Store)',
+    (r'(__MACOSX|\._Store|\.github|\.venv)',
      "metadata",
      None)
     
