@@ -213,16 +213,27 @@ contentSpec = [
      "part2File",
      "part2FileKO"),
     
-    # # directory with the third part of the lab assignment
-    # ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/$",
-    #  "part3Directory",
-    #  "part3DirectoryKO"),
+    # directory with the third part of the lab assignment
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/$',
+     "part3Directory",
+     "part3DirectoryKO"),
 
-    # # directory with the solutions to the third part of the lab
-    # # assignment
-    # ("p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/.+$",
-    #  "part3File",
-    #  "part3FileKO"),
+    # directory with the solutions to the third part of the lab
+    # assignment
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-3/.+$',
+     "part3File",
+     "part3FileKO"),
+
+    # directory with the third part of the lab assignment
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-4/$',
+     "part4Directory",
+     "part4DirectoryKO"),
+
+    # directory with the solutions to the third part of the lab
+    # assignment
+    (r'p1-(?P<nia1>\d{6})(-(?P<nia2>\d{6}))?/parte-4/.+$',
+     "part4File",
+     "part4FileKO"),
 
     # warn the user in case (s)he is submitting metadata
     (r'(__MACOSX|\._Store)',
@@ -268,6 +279,9 @@ class Summary:
     _part3Directory = False
     _part3Files = []
 
+    _part4Directory = False
+    _part4Files = []
+
     def __str__ (self):
         """provides a human readable version of the contents of this class"""
 
@@ -310,6 +324,15 @@ class Summary:
         if Summary._part3Files:
             stream += "\tFiles:\n"
             for ifile in Summary._part3Files:
+                stream += "\t\t{0}\n".format (ifile)
+        stream += "\n"
+
+        folder = "Yes" if Summary._part4Directory else "No"
+        stream += " * Fourth part of the lab assignment:\n"
+        stream += " \tFolder present: {0}\n".format (folder)
+        if Summary._part4Files:
+            stream += "\tFiles:\n"
+            for ifile in Summary._part4Files:
                 stream += "\t\t{0}\n".format (ifile)
         stream += "\n"
 
@@ -549,6 +572,28 @@ def part3File (zipstream, regexp, content, matches):
     # assignment
     Summary._part3Files.append (os.path.basename (content))
 
+# acknowledges the presence of the folder containing the fourth part
+def part4Directory (zipstream, regexp, content, matches):
+    """acknowledges the presence of the folder containing the fourth part"""
+
+    # verify the root directory
+    verifyRootDirectory (content)
+    
+    # record the presence of the directory with the fourth part of the
+    # lab assignment
+    Summary._part4Directory = True
+
+# acknowledges the presence of a file in the folder containing the fourth part
+def part4File (zipstream, regexp, content, matches):
+    """acknowledges the presence of a file in the folder containing the fourth part"""
+
+    # verify the root directory
+    verifyRootDirectory (content)
+    
+    # record the existence of this file in the fourth part of the lab
+    # assignment
+    Summary._part4Files.append (os.path.basename (content))
+
     
 # warn the user in case (s)he is submitting metadat
 def metadata (zipstream, regexp, content, matches):
@@ -651,13 +696,12 @@ def part2FileKO (component):
 
 # reports that the folder containing the third part has not been found
 def part3DirectoryKO (component):
-    """reports that the folder containing the second part has not been found.
+    """reports that the folder containing the third part has not been found.
 
        This is not a fatal error, but the user should be warned much the same"""
 
     print (" Warning: the folder with the third part 'parte-3/' has not been found")
-    print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
-    print ("          the extra point granted for doing this part of the lab assignment")
+    print ("          this does not invalidate your .zip file but be warned that it will not be scored")
     print ()
 
 # reports that the folder containing the third part contains no files
@@ -671,8 +715,31 @@ def part3FileKO (component):
     if (Summary._part3Directory):
     
         print (" Warning: the folder with the third part 'parte-3/' contains no files")
-        print ("          this does not invalidate your .zip file but be warned that you will not be awarded with")
-        print ("          the extra point granted for doing this part of the lab assignment")
+        print ("          this does not invalidate your .zip file but be warned that it will not be scored")
+        print ()
+    
+# reports that the folder containing the fourth part has not been found
+def part4DirectoryKO (component):
+    """reports that the folder containing the fourth part has not been found.
+
+       This is not a fatal error, but the user should be warned much the same"""
+
+    print (" Warning: the folder with the fourth part 'parte-4/' has not been found")
+    print ("          this does not invalidate your .zip file but be warned that it will not be scored")
+    print ()
+
+# reports that the folder containing the fourth part contains no files
+def part4FileKO (component):
+    """reports that the folder containing the fourth part contains no files.
+
+       This is not a fatal error, but the user should be warned much the same"""
+
+    # show the message only in case the directory was found, otherwise, it is
+    # obvious there are no files within an unexistent directory! ;)
+    if (Summary._part3Directory):
+    
+        print (" Warning: the folder with the fourth part 'parte-4/' contains no files")
+        print ("          this does not invalidate your .zip file but be warned that it will not be scored")
         print ()
     
 
@@ -707,6 +774,9 @@ def setUp (zipstream):
 
     Summary._part3Directory = False
     Summary._part3Files = []
+    
+    Summary._part4Directory = False
+    Summary._part4Files = []
     
 
 # tearDown
